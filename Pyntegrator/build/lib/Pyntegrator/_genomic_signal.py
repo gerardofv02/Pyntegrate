@@ -144,9 +144,9 @@ class BaseSignal(object):
 
         # since if we got here processes is not None, then this will trigger
         # a parallel array creation
-        features = helpers.tointerval(features)
+        features = tointerval(features)
         x = np.arange(features.start, features.stop)
-        features = list(helpers.split_feature(features, processes))
+        features = list(split_feature(features, processes))
         ys = self.array(
             features, *args, bins=None, processes=processes, ragged=True,
             **kwargs)

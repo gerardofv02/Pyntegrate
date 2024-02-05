@@ -144,18 +144,18 @@ def imshow(arr, x=None, ax=None, vmin=None, vmax=None, percentile=True,
         if vmin is None:
             vmin = arr.min()
         else:
-            vmin = mlab.prctile(arr.ravel(), vmin)
+            vmin = np.percentile(arr.ravel(), vmin)
         if vmax is None:
             vmax = arr.max()
         else:
-            vmax = mlab.prctile(arr.ravel(), vmax)
+            vmax = np.percentile(arr.ravel(), vmax)
     else:
         if vmin is None:
             vmin = arr.min()
         if vmax is None:
             vmax = arr.max()
 
-    cmap = colormap_adjust.smart_colormap(vmin, vmax)
+    cmap = smart_colormap(vmin, vmax)
     _imshow_kwargs = dict(origin='lower', cmap=cmap, vmin=vmin, vmax=vmax,
                           aspect='auto')
     if imshow_kwargs is not None:
