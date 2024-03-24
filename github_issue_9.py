@@ -2,11 +2,11 @@ import multiprocessing
 from matplotlib import pyplot as plt
 import matplotlib
 import numpy as np
-import Pyntegrator
+import Pyntegrate
 import pybedtools
 
 # Use example data and generate some random features
-gs = Pyntegrator.genomic_signal(Pyntegrator.example_filename('x.bam'), 'bam')
+gs = Pyntegrate.genomic_signal(Pyntegrate.example_filename('x.bam'), 'bam')
 print(gs)
 features = pybedtools.BedTool()\
     .window_maker(
@@ -22,8 +22,20 @@ arr = gs.array(features, processes=multiprocessing.cpu_count(), bins=100)
 
 # At this point, each item in `genes` corresponds to the same row in `arr`
 
-ind, breaks = Pyntegrator.plotutils.clustered_sortind(arr, k=5)
+ind, breaks = Pyntegrate.plotutils.clustered_sortind(arr, random_state=1, k=5)
 
+# print("ind: ",ind)
+# print("breaks: ", breaks)
+
+# np.save("./indpy3.npy", ind)
+# np.save("./breakspy3.npy",breaks)
+
+# ind = np.load('ind.npy')
+
+# print(ind)
+
+# breaks = np.load('breaks.npy')
+# print(breaks)
 # Boundaries of clusters are provided in `breaks`.
 # So the first cluster's original indices into `arr` are:
 cluster_1_inds = ind[0:breaks[0]]

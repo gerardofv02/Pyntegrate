@@ -1,0 +1,19 @@
+Metadata-Version: 2.1
+Name: Pyntegrate
+Version: 0.5.6
+Summary: Integrative analysis of high-thoughput sequencing data
+Home-page: ./Pyntegrate
+Author: Ryan Dale
+Author-email: dalerr@niddk.nih.gov
+License: MIT
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Science/Research
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: System Administrators
+Classifier: Operating System :: POSIX
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Environment :: Console
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Topic :: Scientific/Engineering :: Bio-Informatics
+Classifier: Topic :: Scientific/Engineering :: Medical Science Apps.
+License-File: LICENSE.txt
