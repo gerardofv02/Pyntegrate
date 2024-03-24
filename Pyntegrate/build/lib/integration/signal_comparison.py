@@ -114,12 +114,12 @@ def compare(signal1, signal2, features, outfn, comparefunc=np.subtract,
 
 
 if __name__ == "__main__":
-    import Pyntegrator
-    ip_bam = Pyntegrator.genomic_signal(
-            Pyntegrator.example_filename(
+    import Pyntegrate
+    ip_bam = Pyntegrate.genomic_signal(
+            Pyntegrate.example_filename(
                 'wgEncodeUwTfbsK562CtcfStdAlnRep1.bam'), 'bam')
-    control_bam = Pyntegrator.genomic_signal(
-            Pyntegrator.example_filename(
+    control_bam = Pyntegrate.genomic_signal(
+            Pyntegrate.example_filename(
                 'wgEncodeUwTfbsK562InputStdAlnRep1.bam'), 'bam')
 
     BINSIZE = 10

@@ -17,3 +17,16 @@ Classifier: License :: OSI Approved :: MIT License
 Classifier: Topic :: Scientific/Engineering :: Bio-Informatics
 Classifier: Topic :: Scientific/Engineering :: Medical Science Apps.
 License-File: LICENSE.txt
+Requires-Dist: scipy>=0.10.1
+Requires-Dist: biopython
+Requires-Dist: scikit-learn
+Requires-Dist: bx-python>=0.7.1
+Requires-Dist: Cython
+Requires-Dist: numpy>=1.8.0
+Requires-Dist: matplotlib>=1.3.1
+Requires-Dist: pandas>=0.13.1
+Requires-Dist: pysam>=0.7
+Requires-Dist: gffutils>=0.8.2
+Requires-Dist: PyYAML>=3.10
+Requires-Dist: pybedtools>=0.6.6
+Requires-Dist: fisher

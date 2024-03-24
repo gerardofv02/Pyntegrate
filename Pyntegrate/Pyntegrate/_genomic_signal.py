@@ -271,7 +271,7 @@ class BigBedSignal(IntervalSignal):
         Class for operating on bigBed files.
         """
         IntervalSignal.__init__(self, fn)
-        self.adapter = filetype_adapters.BigBedAdapter(fn)
+        self.adapter = BigBedAdapter(fn)
 
 
 class BedSignal(IntervalSignal):
@@ -280,7 +280,7 @@ class BedSignal(IntervalSignal):
         Class for operating on BED files.
         """
         IntervalSignal.__init__(self, fn)
-        self.adapter = filetype_adapters.BedAdapter(fn)
+        self.adapter = BedAdapter(fn)
 
 
 _registry = {

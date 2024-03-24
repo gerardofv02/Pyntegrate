@@ -5,9 +5,9 @@ import os
 from itertools import *
 import gffutils
 from gffutils.helpers import asinterval
-import Pyntegrator
+import Pyntegrate
 import pybedtools
-from Pyntegrator.minibrowser import SignalMiniBrowser, GeneModelMiniBrowser
+from Pyntegrate.minibrowser import SignalMiniBrowser, GeneModelMiniBrowser
 import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib
@@ -145,8 +145,8 @@ class Chipseq(object):
         :param control_bam: filename of BAM file for control data
         :param dbfn: filename of gffutils database
         """
-        self.ip = Pyntegrator.genomic_signal(ip_bam, kind='bam')
-        self.control = Pyntegrator.genomic_signal(control_bam, kind='bam')
+        self.ip = Pyntegrate.genomic_signal(ip_bam, kind='bam')
+        self.control = Pyntegrate.genomic_signal(control_bam, kind='bam')
         self.dbfn = dbfn
         self.db = None
         if self.dbfn:
@@ -224,7 +224,7 @@ class Chipseq(object):
         if row_order is None:
             row_order = np.arange(nrows)
         extent = (min(x), max(x), 0, nrows)
-        axes_info = Pyntegrator.plotutils.matrix_and_line_shell(strip=strip)
+        axes_info = Pyntegrate.plotutils.matrix_and_line_shell(strip=strip)
         fig, matrix_ax, line_ax, strip_ax, cbar_ax = axes_info
         _imshow_kwargs = dict(
             aspect='auto', extent=extent, interpolation='nearest')
@@ -232,7 +232,7 @@ class Chipseq(object):
             _imshow_kwargs.update(imshow_kwargs)
 
         if 'cmap' not in _imshow_kwargs:
-            _imshow_kwargs['cmap'] = Pyntegrator.colormap_adjust.smart_colormap(
+            _imshow_kwargs['cmap'] = Pyntegrate.colormap_adjust.smart_colormap(
                 self.diffed_array.min(),
                 self.diffed_array.max()
             )
@@ -443,8 +443,8 @@ if __name__ == "__main__":
             raise ValueError('%s not in %s' % (ex, choices))
 
     if 'xcorr' in examples:
-        ip = Pyntegrator.genomic_signal(
-            Pyntegrator.example_filename(
+        ip = Pyntegrate.genomic_signal(
+            Pyntegrate.example_filename(
                 'wgEncodeUwTfbsK562CtcfStdAlnRep1.bam'), 'bam')
 
         NWINDOWS = 5000
@@ -464,12 +464,12 @@ if __name__ == "__main__":
 
     if 'chipseq' in examples:
         # Example files...
-        dbfn = Pyntegrator.example_filename(
+        dbfn = Pyntegrate.example_filename(
             'Homo_sapiens.GRCh37.66.cleaned.gtf.db')
         C = Chipseq(
-            ip_bam=Pyntegrator.example_filename(
+            ip_bam=Pyntegrate.example_filename(
                 'wgEncodeUwTfbsK562CtcfStdAlnRep1.bam'),
-            control_bam=Pyntegrator.example_filename(
+            control_bam=Pyntegrate.example_filename(
                 'wgEncodeUwTfbsK562InputStdAlnRep1.bam'),
             dbfn=dbfn)
 
@@ -496,10 +496,10 @@ if __name__ == "__main__":
 
         # sort genes by TIP zscore
         row_order = np.argsort(
-            Pyntegrator.plotutils.tip_zscores(C.diffed_array))[::-1]
+            Pyntegrate.plotutils.tip_zscores(C.diffed_array))[::-1]
 
         # Plot 'em using a nice red-to-blue colormap
-        from Pyntegrator.colormap_adjust import smart_colormap
+        from Pyntegrate.colormap_adjust import smart_colormap
         cmap = smart_colormap(C.diffed_array.min(), C.diffed_array.max())
 
         C.plot(x=x, row_order=row_order, imshow_kwargs=dict(cmap=cmap))

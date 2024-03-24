@@ -423,7 +423,7 @@ class SignalMiniBrowser(BaseMiniBrowser):
         a simple one-panel browser.
 
         :param genomic_signal_objs: list of genomic signal objects (e.g.,
-            :class:`Pyntegrator.genomic_signal.BamSignal` instances).
+            :class:`Pyntegrate.genomic_signal.BamSignal` instances).
         :param local_coverage_kwargs: a dictionary of kwargs to send to each
             genomic signals' `local_coverage()` method, e.g.::
 
@@ -559,20 +559,20 @@ class PeakMiniBrowser(SignalMiniBrowser):
 
 
 if __name__ == "__main__":
-    import Pyntegrator
+    import Pyntegrate
     import gffutils
     import pybedtools
 
     G = gffutils.FeatureDB(
-        Pyntegrator.example_filename('Homo_sapiens.GRCh37.66.cleaned.gtf.db'))
+        Pyntegrate.example_filename('Homo_sapiens.GRCh37.66.cleaned.gtf.db'))
 
-    ip = Pyntegrator.genomic_signal(
-        Pyntegrator.example_filename('wgEncodeUwTfbsK562CtcfStdAlnRep1.bam'),
+    ip = Pyntegrate.genomic_signal(
+        Pyntegrate.example_filename('wgEncodeUwTfbsK562CtcfStdAlnRep1.bam'),
         'bam')
-    inp = Pyntegrator.genomic_signal(
-        Pyntegrator.example_filename('wgEncodeUwTfbsK562InputStdAlnRep1.bam'),
+    inp = Pyntegrate.genomic_signal(
+        Pyntegrate.example_filename('wgEncodeUwTfbsK562InputStdAlnRep1.bam'),
         'bam')
-    peaks = pybedtools.BedTool(Pyntegrator.example_filename(
+    peaks = pybedtools.BedTool(Pyntegrate.example_filename(
         'wgEncodeUwTfbsK562CtcfStdPkRep1.narrowPeak.gz'))
 
     plotting_kwargs = [
