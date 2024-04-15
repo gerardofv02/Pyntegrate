@@ -185,7 +185,7 @@ class ChIPSeqMiniBrowser(BaseMiniBrowser):
         self.local_coverage_kwargs = local_coverage_kwargs or {}
         self.ip = ip
         self.control = control
-        if isinstance(db, basestring):
+        if isinstance(db, str):
             db = gffutils.FeatureDB(db)
         self.db = db
         self.ip_style = ip_style or {}
@@ -280,7 +280,7 @@ class ChIPSeqMiniBrowser(BaseMiniBrowser):
         bins = self._bins(feature)
         x, y = self.ip.local_coverage(
             feature, bins=bins, **self.local_coverage_kwargs)
-        if isinstance(self.ip, _genomic_signal.BamSignal):
+        if isinstance(self.ip, BamSignal):
             y /= (self.ip.mapped_read_count() / 1e6)
         ax.fill_between(x, y, y2=0, **self.ip_style)
         ax.axis('tight')
@@ -294,7 +294,7 @@ class ChIPSeqMiniBrowser(BaseMiniBrowser):
         bins = self._bins(feature)
         x, y = self.control.local_coverage(
             feature, bins=bins, **self.local_coverage_kwargs)
-        if isinstance(self.control, _genomic_signal.BamSignal):
+        if isinstance(self.control, BamSignal):
             y /= (self.control.mapped_read_count() / 1e6)
         ax.fill_between(x, y, y2=0, **self.control_style)
         ax.axis('tight')

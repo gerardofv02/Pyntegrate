@@ -96,7 +96,8 @@ class BigBedAdapter(BaseAdapter):
         super(BigBedAdapter, self).__init__(fn)
 
     def make_fileobj(self):
-        return BigBedFile(open(self.fn))
+        return BigBedFile(open(self.fn, 'rb'))
+        #return self.fn
 
     def __getitem__(self, key):
         chrom = key.chrom
@@ -133,7 +134,8 @@ class BigWigAdapter(BaseAdapter):
         super(BigWigAdapter, self).__init__(fn)
 
     def make_fileobj(self):
-        return self.fn
+        return BigWigFile(open(self.fn, 'rb'))
+        #return self.fn
 
     def __getitem__(self, key):
         raise NotImplementedError(

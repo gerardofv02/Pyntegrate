@@ -98,7 +98,7 @@ class ResultsTable(object):
         db : gffutils.FeatureDB
         """
         if db is not None:
-            if isinstance(db, basestring):
+            if isinstance(db, str):
                 db = gffutils.FeatureDB(db)
             if not isinstance(db, gffutils.FeatureDB):
                 raise ValueError(
@@ -766,7 +766,7 @@ class DifferentialExpressionResults(ResultsTable):
 
     Adds methods for up/down regulation, ma_plot, and sets class variables for
     which columns should be considered for pval, log fold change, and mean
-    values. This class acts as a parent for subclasses like DESeqResults,
+    values. This class acts as a parent for subclasses like DESeq2Results,
     EdgeRResults, and others/
     """)
     pval_column = 'padj'
@@ -775,7 +775,7 @@ class DifferentialExpressionResults(ResultsTable):
 
     def __init__(self, data, db=None, header_check=True, **kwargs):
         import_kwargs = kwargs.pop('import_kwargs', {})
-        if header_check and isinstance(data, basestring):
+        if header_check and isinstance(data, str):
             comment_char = import_kwargs.get('comment', '#')
             for i, line in enumerate(open(data)):
                 if line[0] != comment_char:
@@ -933,15 +933,143 @@ class EdgeRResults(DifferentialExpressionResults):
     mean_column = 'logCPM'
 
 
-class DESeqResults(DifferentialExpressionResults):
+# class DESeqResults(DifferentialExpressionResults):
+#     __doc__ = _base_doc % dedent(
+#         """
+#         Class for working with results from DESeq.
+
+#         Just like a DifferentialExpressionResults object, but sets the
+#         pval_column, lfc_column, and mean_column to the names used in edgeR's
+#         output.
+#         """)
+#     def colormapped_bedfile(self, genome, cmap=None):
+#         """
+#         Create a BED file with padj encoded as color
+
+#         Features will be colored according to adjusted pval (phred
+#         transformed).  Downregulated features have the sign flipped.
+
+#         Parameters
+#         ----------
+#         cmap : matplotlib colormap
+#             Default is matplotlib.cm.RdBu_r
+
+#         Notes
+#         -----
+#         Requires a FeatureDB to be attached.
+#         """
+#         if self.db is None:
+#             raise ValueError("FeatureDB required")
+#         db = gffutils.FeatureDB(self.db)
+
+#         def scored_feature_generator(d):
+#             for i in range(len(d)):
+#                 try:
+#                     feature = db[d.ix[i]]
+#                 except gffutils.FeatureNotFoundError:
+#                     raise gffutils.FeatureNotFoundError(d.ix[i])
+#                 score = -10 * np.log10(d.padj[i])
+#                 lfc = d.log2FoldChange[i]
+#                 if np.isnan(lfc):
+#                     score = 0
+#                 if lfc < 0:
+#                     score *= -1
+#                 feature.score = str(score)
+#                 feature = extend_fields(
+#                     gff2bed(gffutils.helpers.asinterval(feature)), 9)
+#                 fields = feature.fields[:]
+#                 fields[6] = fields[1]
+#                 fields[7] = fields[2]
+#                 fields.append(str(d.padj[i]))
+#                 fields.append(str(d.pval[i]))
+#                 fields.append('%.3f' % d.log2FoldChange[i])
+#                 fields.append('%.3f' % d.baseMeanB[i])
+#                 fields.append('%.3f' % d.baseMeanB[i])
+#                 yield pybedtools.create_interval_from_list(fields)
+
+#         x = pybedtools.BedTool(scored_feature_generator(self)).saveas()
+#         norm = x.colormap_normalize()
+#         if cmap is None:
+#             cmap = cm.RdBu_r
+#         cmap = cmap_center_point_adjust(
+#             cmap, [norm.vmin, norm.vmax], 0)
+
+#         def score_zeroer(f):
+#             f.score = '0'
+#             return f
+#         return x.each(add_color, cmap=cmap, norm=norm)\
+#                 .sort()\
+#                 .each(score_zeroer)\
+#                 .truncate_to_chrom(genome)\
+#                 .saveas()
+
+#     def autosql_file(self):
+#         """
+#         Generate the autosql for DESeq results (to create bigBed)
+
+#         Returns a temp filename containing the autosql defining the extra
+#         fields.
+
+#         This for creating bigBed files from BED files created by
+#         colormapped_bed.  When a user clicks on a feature, the DESeq results
+#         will be reported.
+#         """
+#         fn = pybedtools.BedTool._tmp()
+
+#         AUTOSQL = dedent(
+#             """
+#             table example
+#             "output from DESeq"
+#             (
+#             string  chrom;  "chromosome"
+#             uint chromStart; "start coord"
+#             uint chromEnd; "stop coord"
+#             string name; "name of feature"
+#             uint score; "always zero"
+#             char[1] strand; "+ or - for strand"
+#             uint    thickStart; "Coding region start"
+#             uint    thickEnd;  "Coding region end"
+#             uint reserved; "color according to score"
+#             string padj; "DESeq adjusted p value"
+#             string pval; "DESeq raw p value"
+#             string logfoldchange; "DESeq log2 fold change"
+#             string basemeana; "DESeq baseMeanA"
+#             string basemeanb; "DESeq baseMeanB"
+#         )
+#         """)
+
+#         fout = open(fn, 'w')
+#         fout.write(AUTOSQL)
+#         fout.close()
+#         return fn
+
+
+# class DESeq2Results(DESeqResults):
+#     __doc__ = _base_doc % dedent(
+#         """
+#         Class for working with results from DESeq2.
+
+#         Just like a DifferentialExpressionResults object, but sets the
+#         pval_column, lfc_column, and mean_column to the names used in edgeR's
+#         output.
+#         """)
+#     pval_column = 'padj'
+#     lfc_column = 'log2FoldChange'
+#     mean_column = 'baseMean'
+
+class DEseq2ResultsPrueba(DifferentialExpressionResults):
     __doc__ = _base_doc % dedent(
         """
-        Class for working with results from DESeq.
+        Class for working with results from DESeq2.
 
         Just like a DifferentialExpressionResults object, but sets the
         pval_column, lfc_column, and mean_column to the names used in edgeR's
         output.
         """)
+     
+    pval_column = 'padj'
+    lfc_column = 'log2FoldChange'
+    mean_column = 'baseMean'
     def colormapped_bedfile(self, genome, cmap=None):
         """
         Create a BED file with padj encoded as color
@@ -991,7 +1119,7 @@ class DESeqResults(DifferentialExpressionResults):
         norm = x.colormap_normalize()
         if cmap is None:
             cmap = cm.RdBu_r
-        cmap = colormap_adjust.cmap_center_point_adjust(
+        cmap = cmap_center_point_adjust(
             cmap, [norm.vmin, norm.vmax], 0)
 
         def score_zeroer(f):
@@ -1044,22 +1172,9 @@ class DESeqResults(DifferentialExpressionResults):
         return fn
 
 
-class DESeq2Results(DESeqResults):
-    __doc__ = _base_doc % dedent(
-        """
-        Class for working with results from DESeq2.
-
-        Just like a DifferentialExpressionResults object, but sets the
-        pval_column, lfc_column, and mean_column to the names used in edgeR's
-        output.
-        """)
-    pval_column = 'padj'
-    lfc_column = 'log2FoldChange'
-    mean_column = 'baseMean'
-
 
 class LazyDict(object):
-    def __init__(self, fn_dict, dbfn, index_file, extra=None, cls=DESeqResults,
+    def __init__(self, fn_dict, dbfn, index_file, extra=None, cls=DEseq2ResultsPrueba,
                  modifier=None):
         """
         Dictionary-like object that lazily-loads ResultsTable objects.

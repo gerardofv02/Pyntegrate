@@ -5,7 +5,7 @@ import os
 import pandas
 import pybedtools
 import numpy as np
-import _genomic_signal
+from ._genomic_signal import *
 
 
 class Binner(object):
@@ -54,7 +54,7 @@ class Binner(object):
             {window_cache_dir}/{chrom}.{windowsize}bp_windows.bed
 
         """
-        self.chromsizes = pybedtools.chromsizes(genome)
+        self.chromsizes = pybedtools.chromsizes(genome)#aqui da error
         if chrom is None:
             self.chroms = sorted(self.chromsizes.keys())
         else:
@@ -108,7 +108,7 @@ class Binner(object):
             same directory as the bigwig file.
 
         """
-        if isinstance(bigwig, _genomic_signal.BigWigSignal):
+        if isinstance(bigwig, BigWigSignal):
             bigwig = bigwig.fn
 
         if outdir is None:
@@ -134,7 +134,9 @@ class Binner(object):
             os.system(' '.join(cmds))
             names = ['name', 'size', 'covered', 'sum', 'mean0', 'mean']
             df = pandas.read_table(tmp_output, names=names)
-            x = df.size.cumsum() - df.size / 2
+            print(df)
+            # x = df.size.cumsum() - df.size / 2 #Anterior
+            x = df["size"].cumsum() - df["size"].size / 2 #Anterior
             y = df[metric]
             np.savez(outfile, x=x, y=y)
             outfiles.append(outfile)

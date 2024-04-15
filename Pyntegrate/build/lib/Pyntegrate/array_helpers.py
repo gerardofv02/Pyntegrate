@@ -25,8 +25,8 @@ def _local_count(reader, feature, stranded=False):
     :param stranded: If `stranded=True`, then only counts signal on the same
         strand as `feature`.
     """
-    if isinstance(feature, basestring):
-        feature = helpers.tointerval(feature)
+    if isinstance(feature, str):
+        feature = tointerval(feature)
     if stranded:
         strand = feature.strand
     else:
@@ -247,7 +247,7 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
 
     # e.g., features = "chr1:1-1000"
     if isinstance(features, str):
-        features = helpers.tointerval(features)
+        features = tointerval(features)
 
     if not ((isinstance(features, list) or isinstance(features, tuple))):
         if bins is not None:
