@@ -205,7 +205,7 @@ class BigWigAdapter(BaseAdapter):
                                  'bigWigSummary')
 
         elif method == 'summarize':
-            bw = BigWigFile(open(self.fn))
+            bw = BigWigFile(open(self.fn, "rb"))
             s = bw.summarize(
                 interval.chrom,
                 interval.start,
