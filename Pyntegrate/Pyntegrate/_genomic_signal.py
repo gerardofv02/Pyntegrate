@@ -128,6 +128,7 @@ class BaseSignal(object):
             del arrays
             return stacked_arrays
         else:
+            print(arrays)
             return arrays
 
     def local_coverage(self, features, *args, **kwargs):
@@ -230,7 +231,7 @@ class BigWigSignal(BaseSignal):
             if values:
                 print("por ahora voy aqui")
                 mapped_reads += sum(1 for v in values if v!= 0)
-            break
+                print(mapped_reads)
         print("Voy por alla")
         # write to file so the next time you need the lib size you can access
         # it quickly
@@ -345,6 +346,78 @@ class BigBedSignal(IntervalSignal):
         """
         IntervalSignal.__init__(self, fn)
         self.adapter = BigBedAdapter(fn)
+
+
+    def mapped_read_count(self, force=False):
+        """
+        Counts total reads in a BAm file.
+
+        If a file self.bam + '.scale' exists, then just read the first line of
+        that file that doesn't start with a "#".  If such a file doesn't exist,
+        then it will be created with the number of reads as the first and only
+        line in the file.
+
+        The result is also stored in self._readcount so that the time-consuming
+        part only runs once; use force=True to force re-count.
+
+        Parameters
+        ----------
+        force : bool
+            If True, then force a re-count; otherwise use cached data if
+            available.
+        """
+        # Already run?
+        if self._readcount and not force:
+            return self._readcount
+
+        if os.path.exists(self.fn + '.mmr') and not force:
+            for line in open(self.fn + '.mmr'):
+                print(line)
+                if line.startswith('#'):
+                    continue
+                self._readcount = float(line.strip())
+                return self._readcount
+
+        # cmds = ['samtools',
+        #         'view',
+        #         '-c',
+        #         '-F', '0x4',
+        #         self.fn]
+        # p = subprocess.Popen(
+        #     cmds, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # stdout, stderr = p.communicate()
+        # if stderr:
+        #     sys.stderr.write('samtools says: %s' % stderr)
+        #     return None
+        # mapped_reads = int(stdout)
+
+        mapped_reads = 0
+        print("Voy por aqui")
+        try:
+            bbFile = pyBigWig.open(self.fn)
+            bbFile.header()
+        except:
+            print("Error opening bigwig file")
+            return self._readcount
+        print("Voy por alli")
+        for chr in bbFile.chroms():
+            print(chr,type(chr))
+            print("\n\n\n\n\n\n\n",bbFile.chroms(chr))
+            values = bbFile.values(chr,0,bbFile.chroms(chr))
+            if values:
+                print("por ahora voy aqui")
+                mapped_reads += sum(1 for v in values if v!= 0)
+                print(mapped_reads)
+        print("Voy por alla")
+        # write to file so the next time you need the lib size you can access
+        # it quickly
+        if not os.path.exists(self.fn + '.mmr'):
+            fout = open(self.fn + '.mmr', 'w')
+            fout.write(str(mapped_reads) + '\n')
+            fout.close()
+
+        self._readcount = mapped_reads
+        return self._readcount
 
 
 class BedSignal(IntervalSignal):
