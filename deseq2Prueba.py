@@ -17,7 +17,7 @@ def tss_generator():
 path = os.path.dirname(os.path.abspath(__file__))
 print(path)
 
-features, arrays = Pyntegrate.chipSeqSignalAnalysis.generate_arrays_features_from_tsses_from_db(os.path.join(path, 'data/gencode.vM25.annotation.gtf.db'), os.path.join(path, 'bwFiles/SRR1204546_sort_nondup.bw'),os.path.join(path, 'bwFiles/SRR1204544_sort_nondup.bw'),genome = "mm10")
+features, arrays ,tsses , tsses_1kb = Pyntegrate.chipSeqSignalAnalysis.generate_arrays_features_from_tsses_from_db(os.path.join(path, 'data/gencode.vM25.annotation.gtf.db'), os.path.join(path, 'BamFiles/SRR1204544_sort_nondup.bw'),'bigwig',os.path.join(path, 'BamFiles/SRR1204546_sort_nondup.bw'),'bigwig',genome = "mm10")
 
 # # # db = gffutils.create_db(data=path+"/Homo_sapiens.GRCh38.109.gtf",dbfn=path+"/data/Homo_sapiens.GRCh38.109.gtf.db")
 # # db = gffutils.create_db(data=path+"/prueba.gtf",dbfn=path+"/data/prueba.gtf.db")
@@ -145,13 +145,14 @@ ax.set_xlabel('Distance from TSS (bp)')
 ax.set_ylabel('Average read coverage (per million mapped reads)')
 ax.legend(loc='best')
 
-plt.show()
 
 
 # Calcular la diferencia después de ajustar los tamaños
-print(arrays["ip"])
+print("Ip_array: ",arrays["ip"], "Len ip_array:", len(arrays["ip"]))
+print("\ninputarray: ",arrays["input"], "Len inputarray:", len(arrays["input"]))
 
 normalized_subtracted = arrays["ip"] - arrays["input"]
+print("Type of normaliz subtracted before all", type(normalized_subtracted))
 # Tweak some font settings so the results look nicer
 # plt.rcParams['font.family'] = 'Arial'
 plt.rcParams['font.size'] = 10
@@ -227,7 +228,7 @@ fig = Pyntegrate.plotutils.imshow(
     sort_by=normalized_subtracted.mean(axis=1)
 )
 
-plt.show()
+
 # "line_axes" is our handle for working on the lower axes.
 # Add some nicer labels.
 fig.line_axes.set_ylabel('Average enrichment')
@@ -235,7 +236,7 @@ fig.line_axes.set_xlabel('Distance from TSS (bp)')
 
 # "array_axes" is our handle for working on the upper array axes.
 # Add a nicer axis label
-fig.array_axes.set_ylabel('Transcripts on chr17')
+fig.array_axes.set_ylabel('Transcripts')
 
 # Remove the x tick labels, since they're redundant
 # with the line axes
@@ -248,9 +249,47 @@ fig.line_axes.axvline(0, linestyle=':', color='k')
 
 fig.cax.set_ylabel("Enrichment")
 
-print(tsses_1kb[0])
-data = Pyntegrate.results_table.DEseq2ResultsPrueba("./desq2_Sanchez.csv")
-print(data)
+
+data = Pyntegrate.results_table.DEseq2ResultsPrueba("./desq2_Sanchez.csv",  import_kwargs=dict(index_col=1))
+print("\ndata: ",data,"len data: ", len(data) )
+data.reindex_to(tsses, attribute='gene_name')
+print("\ndata: ",data,"len data: ", len(data) )
+# data2 = data.data
+import pandas as pd
+df2 = pd.read_csv("./tsses.gtf", sep="\t" ,header= None)
+print(df2[8].values)
+gene_used = []
+indexs = []
+values_not_data = []
+import re
+for idx,value in enumerate(df2.values):
+    if value[8].split(";")[3].split(" ")[2].split('"')[1] in data.index:
+        indexs.append(idx)
+        gene_used.append(value[8].split(";")[3].split(" ")[2].split('"')[1])
+
+
+print(len(indexs))
+print("\n Gene_used: ", gene_used)
+
+for value_data in data.index:
+    if value_data not in gene_used:
+        values_not_data.append(value_data)
+
+print("Len of values not data",len(values_not_data))
+normalized_subtracted_good= []
+##For put good normalized subtracted
+for i in range(len(normalized_subtracted)):
+    if i in indexs:
+        normalized_subtracted_good.append(normalized_subtracted[i])
+##FOr deseq2
+data = data.drop(values_not_data)
+
+normalized_subtracted= np.array(normalized_subtracted_good)
+print("Normalized subtract len: ", len(normalized_subtracted))
+
+# data2['log2FoldChange'] = data["fpkm"]
+# print("Len data2: ",len(data2), "DAta2: ",data2)
+# print("\n\nlen data: ",len(data), "Data: ", data)
 
 fig = Pyntegrate.plotutils.imshow(
     # Same as before...
@@ -270,9 +309,15 @@ fig = Pyntegrate.plotutils.imshow(
 # `fig.gs` contains the `matplotlib.gridspec.GridSpec` object,
 # so we can now create the new axes.
 
+
+
 bottom_axes = plt.subplot(fig.gs[2, 0])
+
+print("\n\n\n\n\n, Bottom axes: ", bottom_axes)
 upregulated = (data.log2FoldChange > 1)
+print("\n\n\n\nUpregulated: ", upregulated, "\nLen upregulated:  ", len(upregulated))
 index = upregulated.values
+print("\n\n\n Index: ", index, "\nlen de index:", len(index))
 # upregulated_chipseq_signal = normalized_subtracted[index, :]
 # subset = normalized_subtracted[(data.log2FoldChange > 1).values, :]
 
@@ -292,6 +337,9 @@ index = upregulated.values
 # valid_indices_minus_mas = ~data.log2FoldChange.isna() & ((data.log2FoldChange >= -1).values) &((data.log2FoldChange <= 1).values)
 # subset = np.take(normalized_subtracted, valid_indices, axis=0)
 # print(subset)
+# # # # # normalized_subtracted = normalized_subtracted[:14543]
+print("\n\nnormalized, datafoldchange > 1", normalized_subtracted[(data.log2FoldChange > 1).values, :], "Len: ", len(normalized_subtracted[(data.log2FoldChange > 1).values, :]))
+# Signal over TSSs of transcripts that were activated upon knockdown.
 Pyntegrate.plotutils.ci_plot(
     x,
     normalized_subtracted[(data.log2FoldChange > 1).values, :],
@@ -315,6 +363,8 @@ Pyntegrate.plotutils.ci_plot(
     fill_kwargs=dict(color='.5', alpha=0.3),
     ax=bottom_axes)
 
+
+
 # Clean up redundant x tick labels, and add axes labels
 fig.line_axes.set_xticklabels([])
 fig.array_axes.set_xticklabels([])
@@ -332,3 +382,4 @@ for ax in [fig.line_axes, fig.array_axes, bottom_axes]:
 bottom_axes.legend(loc='best', frameon=False, fontsize=8, labelspacing=.3, handletextpad=0.2)
 fig.subplots_adjust(left=0.3, right=0.8, bottom=0.05)
 # plt.show()
+plt.show()

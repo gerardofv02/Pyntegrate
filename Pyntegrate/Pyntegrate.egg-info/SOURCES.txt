@@ -15,6 +15,7 @@ Pyntegrate/minibrowser.py
 Pyntegrate/persistence.py
 Pyntegrate/plotutils.py
 Pyntegrate/rebin_naive.py
+Pyntegrate/remove_duplicates.sh
 Pyntegrate/results_table.py
 Pyntegrate/tableprinter.py
 Pyntegrate/version.py

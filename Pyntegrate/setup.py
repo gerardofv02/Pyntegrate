@@ -33,6 +33,7 @@ setup(
                 'test/data/gdc*',
                 'test/data/make_examples_from_pybedtools.py',
                 'test/data/x.*',
+                './remove_duplicates.sh'
             ]
         },
         scripts=[

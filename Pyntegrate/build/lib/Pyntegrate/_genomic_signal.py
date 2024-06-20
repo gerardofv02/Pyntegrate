@@ -123,12 +123,14 @@ class BaseSignal(object):
                 chunksize=chunksize, **kwargs)
         else:
             arrays = _array(self.fn, self.__class__, features, **kwargs)
+            ##Pasa por array (arrayhelpers)
         if not ragged:
             stacked_arrays = np.row_stack(arrays)
             del arrays
+            print("\n\n\n\n\nnnnLOS arrayas finalmente creados",stacked_arrays)
             return stacked_arrays
         else:
-            print(arrays)
+            print("\n\n\n\n\nnnnLOS arrayas finalmente creados",arrays)
             return arrays
 
     def local_coverage(self, features, *args, **kwargs):
@@ -219,7 +221,7 @@ class BigWigSignal(BaseSignal):
         print("Voy por aqui")
         try:
             bwFile = pyBigWig.open(self.fn)
-            bwFile.header()
+            print(bwFile.header())
         except:
             print("Error opening bigwig file")
             return self._readcount
@@ -232,6 +234,13 @@ class BigWigSignal(BaseSignal):
                 print("por ahora voy aqui")
                 mapped_reads += sum(1 for v in values if v!= 0)
                 print(mapped_reads)
+        # bw = pyBigWig.open(self.fn)
+        # mapped_reads = 0
+        # for chrom in bw.chroms():
+        #     stats = bw.stats(chrom, type='sum')
+        #     if stats and len(stats) > 0:
+        #         mapped_reads += stats[0]  # Add the first value if stats is not empty
+        # bw.close()
         print("Voy por alla")
         # write to file so the next time you need the lib size you can access
         # it quickly
@@ -320,6 +329,10 @@ class BamSignal(IntervalSignal):
                 '-c',
                 '-F', '0x4',
                 self.fn]
+        # cmds = ['samtools',
+        #         'view',
+        #         '-c',
+        #         self.fn]
         p = subprocess.Popen(
             cmds, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = p.communicate()
@@ -347,7 +360,7 @@ class BigBedSignal(IntervalSignal):
         IntervalSignal.__init__(self, fn)
         self.adapter = BigBedAdapter(fn)
 
-        
+
     def mapped_read_count(self, force=False):
         """
         Counts total reads in a BAm file.
@@ -394,16 +407,16 @@ class BigBedSignal(IntervalSignal):
         mapped_reads = 0
         print("Voy por aqui")
         try:
-            bwFile = pyBigWig.open(self.fn)
-            bwFile.header()
+            bbFile = pyBigWig.open(self.fn)
+            bbFile.header()
         except:
             print("Error opening bigwig file")
             return self._readcount
         print("Voy por alli")
-        for chr in bwFile.chroms():
+        for chr in bbFile.chroms():
             print(chr,type(chr))
-            print("\n\n\n\n\n\n\n",bwFile.chroms(chr))
-            values = bwFile.values(chr,0,bwFile.chroms(chr))
+            print("\n\n\n\n\n\n\n",bbFile.chroms(chr))
+            values = bbFile.values(chr,0,bbFile.chroms(chr))
             if values:
                 print("por ahora voy aqui")
                 mapped_reads += sum(1 for v in values if v!= 0)
