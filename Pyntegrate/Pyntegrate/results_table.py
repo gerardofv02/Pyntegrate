@@ -8,11 +8,15 @@ import matplotlib.patches as patches
 import matplotlib
 from .plotutils import *
 from .plotutils import _updatecopy
+from .helpers import *
 from matplotlib.transforms import blended_transform_factory
 from matplotlib.collections import EventCollection
 import gffutils
 import pybedtools
 from pybedtools import featurefuncs
+
+import seaborn as sns
+from adjustText import adjust_text
 
 _base_doc = """%s
 The underlying pandas.DataFrame is always available with the `data`
@@ -933,143 +937,15 @@ class EdgeRResults(DifferentialExpressionResults):
     mean_column = 'logCPM'
 
 
-# class DESeqResults(DifferentialExpressionResults):
-#     __doc__ = _base_doc % dedent(
-#         """
-#         Class for working with results from DESeq.
-
-#         Just like a DifferentialExpressionResults object, but sets the
-#         pval_column, lfc_column, and mean_column to the names used in edgeR's
-#         output.
-#         """)
-#     def colormapped_bedfile(self, genome, cmap=None):
-#         """
-#         Create a BED file with padj encoded as color
-
-#         Features will be colored according to adjusted pval (phred
-#         transformed).  Downregulated features have the sign flipped.
-
-#         Parameters
-#         ----------
-#         cmap : matplotlib colormap
-#             Default is matplotlib.cm.RdBu_r
-
-#         Notes
-#         -----
-#         Requires a FeatureDB to be attached.
-#         """
-#         if self.db is None:
-#             raise ValueError("FeatureDB required")
-#         db = gffutils.FeatureDB(self.db)
-
-#         def scored_feature_generator(d):
-#             for i in range(len(d)):
-#                 try:
-#                     feature = db[d.ix[i]]
-#                 except gffutils.FeatureNotFoundError:
-#                     raise gffutils.FeatureNotFoundError(d.ix[i])
-#                 score = -10 * np.log10(d.padj[i])
-#                 lfc = d.log2FoldChange[i]
-#                 if np.isnan(lfc):
-#                     score = 0
-#                 if lfc < 0:
-#                     score *= -1
-#                 feature.score = str(score)
-#                 feature = extend_fields(
-#                     gff2bed(gffutils.helpers.asinterval(feature)), 9)
-#                 fields = feature.fields[:]
-#                 fields[6] = fields[1]
-#                 fields[7] = fields[2]
-#                 fields.append(str(d.padj[i]))
-#                 fields.append(str(d.pval[i]))
-#                 fields.append('%.3f' % d.log2FoldChange[i])
-#                 fields.append('%.3f' % d.baseMeanB[i])
-#                 fields.append('%.3f' % d.baseMeanB[i])
-#                 yield pybedtools.create_interval_from_list(fields)
-
-#         x = pybedtools.BedTool(scored_feature_generator(self)).saveas()
-#         norm = x.colormap_normalize()
-#         if cmap is None:
-#             cmap = cm.RdBu_r
-#         cmap = cmap_center_point_adjust(
-#             cmap, [norm.vmin, norm.vmax], 0)
-
-#         def score_zeroer(f):
-#             f.score = '0'
-#             return f
-#         return x.each(add_color, cmap=cmap, norm=norm)\
-#                 .sort()\
-#                 .each(score_zeroer)\
-#                 .truncate_to_chrom(genome)\
-#                 .saveas()
-
-#     def autosql_file(self):
-#         """
-#         Generate the autosql for DESeq results (to create bigBed)
-
-#         Returns a temp filename containing the autosql defining the extra
-#         fields.
-
-#         This for creating bigBed files from BED files created by
-#         colormapped_bed.  When a user clicks on a feature, the DESeq results
-#         will be reported.
-#         """
-#         fn = pybedtools.BedTool._tmp()
-
-#         AUTOSQL = dedent(
-#             """
-#             table example
-#             "output from DESeq"
-#             (
-#             string  chrom;  "chromosome"
-#             uint chromStart; "start coord"
-#             uint chromEnd; "stop coord"
-#             string name; "name of feature"
-#             uint score; "always zero"
-#             char[1] strand; "+ or - for strand"
-#             uint    thickStart; "Coding region start"
-#             uint    thickEnd;  "Coding region end"
-#             uint reserved; "color according to score"
-#             string padj; "DESeq adjusted p value"
-#             string pval; "DESeq raw p value"
-#             string logfoldchange; "DESeq log2 fold change"
-#             string basemeana; "DESeq baseMeanA"
-#             string basemeanb; "DESeq baseMeanB"
-#         )
-#         """)
-
-#         fout = open(fn, 'w')
-#         fout.write(AUTOSQL)
-#         fout.close()
-#         return fn
-
-
-# class DESeq2Results(DESeqResults):
-#     __doc__ = _base_doc % dedent(
-#         """
-#         Class for working with results from DESeq2.
-
-#         Just like a DifferentialExpressionResults object, but sets the
-#         pval_column, lfc_column, and mean_column to the names used in edgeR's
-#         output.
-#         """)
-#     pval_column = 'padj'
-#     lfc_column = 'log2FoldChange'
-#     mean_column = 'baseMean'
-
-class DEseq2ResultsPrueba(DifferentialExpressionResults):
+class DESeqResults(DifferentialExpressionResults):
     __doc__ = _base_doc % dedent(
         """
-        Class for working with results from DESeq2.
+        Class for working with results from DESeq.
 
         Just like a DifferentialExpressionResults object, but sets the
         pval_column, lfc_column, and mean_column to the names used in edgeR's
         output.
         """)
-     
-    pval_column = 'padj'
-    lfc_column = 'log2FoldChange'
-    mean_column = 'baseMean'
     def colormapped_bedfile(self, genome, cmap=None):
         """
         Create a BED file with padj encoded as color
@@ -1105,6 +981,203 @@ class DEseq2ResultsPrueba(DifferentialExpressionResults):
                 feature.score = str(score)
                 feature = extend_fields(
                     gff2bed(gffutils.helpers.asinterval(feature)), 9)
+                fields = feature.fields[:]
+                fields[6] = fields[1]
+                fields[7] = fields[2]
+                fields.append(str(d.padj[i]))
+                fields.append(str(d.pval[i]))
+                fields.append('%.3f' % d.log2FoldChange[i])
+                fields.append('%.3f' % d.baseMeanB[i])
+                fields.append('%.3f' % d.baseMeanB[i])
+                yield pybedtools.create_interval_from_list(fields)
+
+        x = pybedtools.BedTool(scored_feature_generator(self)).saveas()
+        norm = x.colormap_normalize()
+        if cmap is None:
+            cmap = cm.RdBu_r
+        cmap = cmap_center_point_adjust(
+            cmap, [norm.vmin, norm.vmax], 0)
+
+        def score_zeroer(f):
+            f.score = '0'
+            return f
+        return x.each(add_color, cmap=cmap, norm=norm)\
+                .sort()\
+                .each(score_zeroer)\
+                .truncate_to_chrom(genome)\
+                .saveas()
+
+    def autosql_file(self):
+        """
+        Generate the autosql for DESeq results (to create bigBed)
+
+        Returns a temp filename containing the autosql defining the extra
+        fields.
+
+        This for creating bigBed files from BED files created by
+        colormapped_bed.  When a user clicks on a feature, the DESeq results
+        will be reported.
+        """
+        fn = pybedtools.BedTool._tmp()
+
+        AUTOSQL = dedent(
+            """
+            table example
+            "output from DESeq"
+            (
+            string  chrom;  "chromosome"
+            uint chromStart; "start coord"
+            uint chromEnd; "stop coord"
+            string name; "name of feature"
+            uint score; "always zero"
+            char[1] strand; "+ or - for strand"
+            uint    thickStart; "Coding region start"
+            uint    thickEnd;  "Coding region end"
+            uint reserved; "color according to score"
+            string padj; "DESeq adjusted p value"
+            string pval; "DESeq raw p value"
+            string logfoldchange; "DESeq log2 fold change"
+            string basemeana; "DESeq baseMeanA"
+            string basemeanb; "DESeq baseMeanB"
+        )
+        """)
+
+        fout = open(fn, 'w')
+        fout.write(AUTOSQL)
+        fout.close()
+        return fn
+
+
+# class DESeq2Results(DESeqResults):
+#     __doc__ = _base_doc % dedent(
+#         """
+#         Class for working with results from DESeq2.
+
+#         Just like a DifferentialExpressionResults object, but sets the
+#         pval_column, lfc_column, and mean_column to the names used in edgeR's
+#         output.
+#         """)
+#     pval_column = 'padj'
+#     lfc_column = 'log2FoldChange'
+#     mean_column = 'baseMean'
+
+class DEseq2ResultsPrueba(DifferentialExpressionResults):
+    __doc__ = _base_doc % dedent(
+        """
+        Class for working with results from DESeq2.
+
+        Just like a DifferentialExpressionResults object, but sets the
+        pval_column, lfc_column, and mean_column to the names used in edgeR's
+        output.
+        """)
+     
+    pval_column = 'padj'
+    lfc_column = 'log2FoldChange'
+    mean_column = 'baseMean'
+
+    def volcano_plot(self,column_name_padj,log2FoldChange_upper, log2FoldChange_lower, nlog10_upper,text_nlog10,text_log2FoldChange):
+
+        """
+        Function prepared for deseq2 tables for plotting as a volcano plot. There you can see which genes are upregulated,downregulated or not changed
+        Params: 
+            - column_name_padj: String: Indicate which column has to be converted into the column of -nlog10
+            - log2FoldChange_upper: Number: Indicate the number for log2FoldChange to see which gene is upregulated
+            - log2FoldChange_lower: Number: Indicate the number for log2FoldChange to see which gene is downregulated
+            - nlog10upper: Number: Indicate the number for nlog10 to see which gene is upregulated or downregulated
+            - text_nlog10: Number: Indicate the number to indicate how much upper must nlog10 be for indicate the name of the gene
+            - text_log2FoldChange: Number: Indicate the number to indicate how much upper must log2FoldChange be for indicate the name of the gene
+        """
+
+        self.data["gene_name"] = self.index
+
+        self.data['nlog10'] = -np.log10(self.data[column_name_padj])
+
+        self.data['color'] = self.data[['log2FoldChange', 'nlog10']].apply(map_color, axis = 1,down_log2FoldChange=log2FoldChange_lower,upper_log2FoldChange=log2FoldChange_upper,upper_nlog10=nlog10_upper)
+        print(self.head())
+        fig = plt.figure(figsize = (8,6))
+
+        # Plot graph
+        ax = sns.scatterplot(data = self.data, x = 'log2FoldChange', y = 'nlog10', hue = 'color', hue_order=['upregulated', 'downregulated', 'not significant'],
+                            palette=['red', 'blue', 'grey'])
+
+        # axis lines in the center of the graph
+        ax.axhline(nlog10_upper, zorder = 0, c = 'k', lw = 2, ls = '--') ##Tamaño de nlog10
+        ax.axvline(log2FoldChange_upper, zorder = 0, c = 'k', lw = 2, ls = '--') ##Tamaño de log2foldchange upper
+        ax.axvline(log2FoldChange_lower, zorder = 0, c = 'k', lw = 2, ls = '--') ##Tamaño de log2foldChange lower
+
+        # Gene names in the graph
+        texts = []
+        for i in range(len(self.data)):
+            if self.data.iloc[i]['nlog10'] > text_nlog10 and abs(self.data.iloc[i]["log2FoldChange"]) > text_log2FoldChange:
+                texts.append(plt.text(x = self.data.iloc[i]["log2FoldChange"], y = self.data.iloc[i]["nlog10"], s = self.data.iloc[i]["gene_name"],
+                                    fontsize = 12, weight = 'bold'))
+        # Arrows to the dots         
+        adjust_text(texts, arrowprops = dict(arrowstyle = '-', color = 'k'))
+
+        # Legend position
+        plt.legend(loc = 1, bbox_to_anchor = (1.4,1), frameon = False, prop = {'weight':'bold'})
+        plt.subplots_adjust(right=0.75)  # Ajusta el valor según sea necesario
+
+        # Axis spines
+        for axis in ['bottom', 'left']:
+            ax.spines[axis].set_linewidth(2)
+            
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+
+        # Axis ticks
+        ax.tick_params(width = 2)
+
+        plt.xticks(size = 12, weight = 'bold')
+        plt.yticks(size = 12, weight = 'bold')
+
+        # Axis labels
+        plt.xlabel("$log_{2}$ fold change", size = 15)
+        plt.ylabel("-$log_{10}$ FDR", size = 15)
+
+        # Save figure
+        #plt.savefig('./Volcano_plots/Garcia_et_al_seaborn.png', dpi = 300, bbox_inches = 'tight', facecolor = 'white')
+
+        # Plot figure
+        plt.show()
+        return fig
+    
+
+    def colormapped_bedfile(self, genome, cmap=None):
+        """
+        Create a BED file with padj encoded as color
+
+        Features will be colored according to adjusted pval (phred
+        transformed).  Downregulated features have the sign flipped.
+
+        Parameters
+        ----------
+        cmap : matplotlib colormap
+            Default is matplotlib.cm.RdBu_r
+
+        Notes
+        -----
+        Requires a FeatureDB to be attached.
+        """
+        if self.db is None:
+            raise ValueError("FeatureDB required")
+        db = gffutils.FeatureDB(self.db)
+
+        def scored_feature_generator(d):
+            for i in range(len(d)):
+                try:
+                    feature = db[d.ix[i]]
+                except gffutils.FeatureNotFoundError:
+                    raise gffutils.FeatureNotFoundError(d.ix[i])
+                score = -10 * np.log10(d.padj[i])
+                lfc = d.log2FoldChange[i]
+                if np.isnan(lfc):
+                    score = 0
+                if lfc < 0:
+                    score *= -1
+                feature.score = str(score)
+                feature = pybedtools.extend_fields(
+                    gffutils.gff2bed(gffutils.helpers.asinterval(feature)), 9)
                 fields = feature.fields[:]
                 fields[6] = fields[1]
                 fields[7] = fields[2]

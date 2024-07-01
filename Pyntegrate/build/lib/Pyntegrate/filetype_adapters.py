@@ -180,7 +180,7 @@ class BigWigAdapter(BaseAdapter):
         #
         # That's OK -- we're expecting that to happen sometimes. So temporarily
         # disable this error reporting for the duration of this method.
-        print("\n\n\n\n\n\n\n\n iNTERVAL: ", interval)
+        ##print("\n\n\n\n\n\n\n\n iNTERVAL: ", interval)
         orig = np.geterr()['invalid']
         np.seterr(invalid='ignore')
 
@@ -190,7 +190,7 @@ class BigWigAdapter(BaseAdapter):
                 interval.chrom,
                 interval.start,
                 interval.stop,)
-            print("\nS: ",s,"\nCHROM: ", interval.chrom , "\nSTART: ",interval.start,"\nSTOP: ", interval.stop)
+            ##print("\nS: ",s,"\nCHROM: ", interval.chrom , "\nSTART: ",interval.start,"\nSTOP: ", interval.stop)
             if s is None:
                 s = np.zeros((interval.stop - interval.start,))
             else:
@@ -208,22 +208,22 @@ class BigWigAdapter(BaseAdapter):
 
         elif method == 'summarize':
             ##Ejemplo deberia pasar por aqui
-            print("\n\n\n\n\n\n El ejemplo pasa por metodo summarize")
+            #print("\n\n\n\n\n\n El ejemplo pasa por metodo summarize")
             bw = BigWigFile(open(self.fn, "rb"))
             s = bw.summarize(
                 interval.chrom,
                 interval.start,
                 interval.stop, bins)
-            print("\nS: ",s,"\nCHROM: ", interval.chrom , "\nSTART: ",interval.start,"\nSTOP: ", interval.stop, "\nFunction.>" , function)
+            #print("\nS: ",s,"\nCHROM: ", interval.chrom , "\nSTART: ",interval.start,"\nSTOP: ", interval.stop, "\nFunction.>" , function)
             if s is None:
                 s = np.zeros((bins,))
             else:
                 if function == 'sum':
                     s = s.sum_data
                 elif function == 'mean':
-                    print("S before mean calculation: ", s)
+                    #print("S before mean calculation: ", s)
                     s = s.sum_data / s.valid_count
-                    print("S after mean calculation: ", s, "Len de s afer mean calculation: ", len(s))
+                    #print("S after mean calculation: ", s, "Len de s afer mean calculation: ", len(s))
                     if zero_nan:
                         s[np.isnan(s)] = 0
                 elif function == 'min':
@@ -249,14 +249,14 @@ class BigWigAdapter(BaseAdapter):
 
         # Reset NumPy error reporting
         np.seterr(divide=orig)
-        print("\n\nS its : ", s, "\n len of S at final point: ", len(s))
+        #print("\n\nS its : ", s, "\n len of S at final point: ", len(s))
         return s
 
     def ucsc_summarize(self, interval, bins=None, function='mean'):
         if bins is None:
             bins = len(interval)
         y = np.zeros(bins)
-        print("\nCHROM: ", interval.chrom , "\nSTART: ",interval.start,"\nSTOP: ", interval.stop)
+        #print("\nCHROM: ", interval.chrom , "\nSTART: ",interval.start,"\nSTOP: ", interval.stop)
         cmds = [
             'bigWigSummary',
             self.fn,

@@ -111,3 +111,14 @@ def tointerval(s):
                 m.group('stop'),
             ])
     return s
+
+
+def map_color(a,down_log2FoldChange, upper_log2FoldChange, upper_nlog10):
+    
+    log2FoldChange, nlog10 = a
+    
+    if log2FoldChange > upper_log2FoldChange and nlog10 > upper_nlog10:
+        return 'upregulated'
+    elif log2FoldChange < down_log2FoldChange and nlog10 > upper_nlog10:
+        return 'downregulated'
+    return 'not significant'

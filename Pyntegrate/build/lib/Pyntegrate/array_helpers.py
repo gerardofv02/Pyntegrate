@@ -217,7 +217,7 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
     # bigWig files are handled differently, so we need to know if we're working
     # with one; raise exeception if a kwarg was supplied that's not supported.
     if isinstance(reader, BigWigAdapter):
-        print("Si que es bigwig y reader: ", reader)
+        #print("Si que es bigwig y reader: ", reader)
         is_bigwig = True
         defaults = (
             ('read_strand', read_strand, None),
@@ -251,22 +251,22 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
     # e.g., features = "chr1:1-1000"
     if isinstance(features, str):
         features = tointerval(features)
-        # print("My features: ",features)
+        # #print("My features: ",features)
 
     if not ((isinstance(features, list) or isinstance(features, tuple))):
         if bins is not None:
             if not isinstance(bins, int):
                 raise ArgumentError(
                     "bins must be an int, got %s" % type(bins))
-        # print("\n features",features, "\n bins: ", bins)
+        # #print("\n features",features, "\n bins: ", bins)
         features = [features]
         bins = [bins]
-        print("\nFeatures: " , features ,  "\n Bins: ", bins)
-        # print("\n features after",features, "\n bins after: ", bins)
+        #print("\nFeatures: " , features ,  "\n Bins: ", bins)
+        # #print("\n features after",features, "\n bins after: ", bins)
     else:
         if bins is None:
             bins = [None for i in features]
-            print("\n features",features, "\n bins: ", bins)
+            #print("\n features",features, "\n bins: ", bins)
         if not len(bins) == len(features):
             raise ArgumentError(
                 "bins must have same length as feature list")
@@ -278,16 +278,16 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
     profiles = []
     xs = []
     xds = zip(features,bins)
-    print("\n\n\n\n\nnnnnThe FEATURES: ", features, "\nTHE BINS: " , bins , "\n The mix : ", next(xds))
+    #print("\n\n\n\n\nnnnnThe FEATURES: ", features, "\nTHE BINS: " , bins , "\n The mix : ", next(xds))
     for window, nbin in zip(features, bins):
-        print("\n Window = ", window, "\nWindow to interval: ", tointerval(window), "\nnbin: " , nbin)
+        #print("\n Window = ", window, "\nWindow to interval: ", tointerval(window), "\nnbin: " , nbin)
         window = tointerval(window)
         chrom = window.chrom
         start = window.start
         stop = window.stop
         strand = window.strand
 
-        # print("Window: " , window, "\n chrom: " , chrom, "\n start: ", start, "\n stop:" , stop, "\n strand: ", strand)
+        # #print("Window: " , window, "\n chrom: " , chrom, "\n start: ", start, "\n stop:" , stop, "\n strand: ", strand)
 
         if not is_bigwig:
             # Extend the window to catch reads that would extend into the
@@ -360,7 +360,7 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
 
         else:  # it's a bigWig
             ##Aqui es donde cambia todo (fileadapters)
-            print("\nNBIN: ",nbin, "WINDOWlen: ", len(window),"\nWINODW: ", window, "\nWINDOW TYPE", type(window),"\nREADER: ", reader)
+            #print("\nNBIN: ",nbin, "WINDOWlen: ", len(window),"\nWINODW: ", window, "\nWINDOW TYPE", type(window),"\nREADER: ", reader)
             profile = reader.summarize(
                 window,
                 method=method,
@@ -370,11 +370,11 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
                 zero_nan=zero_nan,
                 )
             #investigar bien
-            print("\n Profile beign a bigwig: ", profile)
+            #print("\n Profile beign a bigwig: ", profile)
 
         # If no bins, return genomic coords
         if (nbin is None):
-            print("nobin is none: ", nbin)
+            #print("nobin is none: ", nbin)
             x = np.arange(start, stop)
 
         # Otherwise do the downsampling; resulting x is stll in genomic
@@ -395,7 +395,7 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
                 x = np.linspace(start, stop - 1, nbin)
 
         # Minus-strand profiles should be flipped left-to-right.
-        # print("\n Stranded: ", stranded)
+        # #print("\n Stranded: ", stranded)
         if stranded and strand == '-':
             profile = profile[::-1]
         xs.append(x)
@@ -404,7 +404,7 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
             profile /= scale
         profiles.append(profile)
 
-    # print("\nProfiles: ",profiles)
+    # #print("\nProfiles: ",profiles)
 
     stacked_xs = np.hstack(xs)
     stacked_profiles = np.hstack(profiles)
@@ -424,11 +424,11 @@ def _array_parallel(fn, cls, genelist, chunksize=250, processes=1, **kwargs):
 
     A chunksize of 25-100 seems to work well on 8 cores.
     """
-    # print("\n\nGenelist: ", genelist)
+    # #print("\n\nGenelist: ", genelist)
     # genelist = remove_duplicates(genelist)
     pool = multiprocessing.Pool(processes)
     chunks = list(chunker(genelist, chunksize))
-    # print("\n chunks: ", chunks, "\n")
+    # #print("\n chunks: ", chunks, "\n")
     # pool.map can only pass a single argument to the mapped function, so you
     # need this trick for passing multiple arguments; idea from
     # http://stackoverflow.com/questions/5442910/
@@ -481,7 +481,7 @@ def _array_star(args):
     a pool.map-ed function
     """
     fn, cls, genelist, kwargs = args
-    print("cls", cls, "genelist: ", genelist, "kwargs: ", kwargs)
+    #print("cls", cls, "genelist: ", genelist, "kwargs: ", kwargs)
     return _array(fn, cls, genelist, **kwargs)
 
 
@@ -499,44 +499,51 @@ def _array(fn, cls, genelist, **kwargs):
     if 'bins' in kwargs:
         if isinstance(kwargs['bins'], int):
             kwargs['bins'] = [kwargs['bins']]
-            print("\n\n\n\n\n\n\n\n\n\nMy kwargs:",kwargs)
+            #print("\n\n\n\n\n\n\n\n\n\nMy kwargs:",kwargs)
     
-    # print("\n\n\n\n\n\n\n\n\n\nMy genelist:",genelist)
+    # #print("\n\n\n\n\n\n\n\n\n\nMy genelist:",genelist)
 
     for gene in genelist:
-        print("\n\nGene: ", gene ,  "\n\nGeneList: ", genelist)
+        #print("\n\nGene: ", gene ,  "\n\nGeneList: ", genelist)
         if not isinstance(gene, (list, tuple)):
-            # print("\n\n\n\n\n\n\n\n\n\nMy gene:",gene)
+            # #print("\n\n\n\n\n\n\n\n\n\nMy gene:",gene)
             gene = [gene]
-            # print("\n\n\n\n\n\n\n\n\n\nMy gene after array it:",gene)
+            # #print("\n\n\n\n\n\n\n\n\n\nMy gene after array it:",gene)
             ##Local covreage (arrayhelpers) sin accumulate
         coverage_x, coverage_y = _local_coverage_func(
             reader, gene, **kwargs)
-        print("\n\n\n\n\n\n\n\n\n\nMy coverage_y:",coverage_y, "\nlen of coverage: ", len(coverage_y))
+        #print("\n\n\n\n\n\n\n\n\n\nMy coverage_y:",coverage_y, "\nlen of coverage: ", len(coverage_y))
         biglist.append(coverage_y)
-    print("\n\n\n\n BigList::", biglist, "Len the biglist: ", len(biglist[0]))
+    #print("\n\n\n\n BigList::", biglist, "Len the biglist: ", len(biglist[0]))
     return biglist
 
 
 ##Funcion para eliminar de la lista los genes repetidos
 
 def remove_duplicates(fileName):
-    gene_names_vistos = set()  # Conjunto para almacenar gene_names vistos
-    lineas_salida = []  # Lista para almacenar líneas de salida únicas
+    gene_names_vistos = set()  
+    lineas_salida = [] 
 
     with open(fileName, 'r') as f_in:
         for linea in f_in:
             campos = linea.strip().split('\t')
 
-            # Buscar gene_name dentro del campo gene_id o gene_name
             gene_name = None
             for campo in campos:
                 if 'gene_name "' in campo:
+                    ##############################################
+                    #Posición para el dato del humano
+                    # gene_name = campo.split(' "')[5].split('"')[0]
+                    ##############################################
+                    
+
+                    ##############################################
+                    #Posición para el dato del ratón
                     gene_name = campo.split(' "')[4].split('"')[0]
+                    ##############################################
                     break
 
             if gene_name:
-                # Verificar si ya se ha visto este gene_name
                 if gene_name not in gene_names_vistos:
                     gene_names_vistos.add(gene_name)
                     lineas_salida.append(linea)

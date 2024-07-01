@@ -127,10 +127,10 @@ class BaseSignal(object):
         if not ragged:
             stacked_arrays = np.row_stack(arrays)
             del arrays
-            print("\n\n\n\n\nnnnLOS arrayas finalmente creados",stacked_arrays)
+            #print("\n\n\n\n\nnnnLOS arrayas finalmente creados",stacked_arrays)
             return stacked_arrays
         else:
-            print("\n\n\n\n\nnnnLOS arrayas finalmente creados",arrays)
+            #print("\n\n\n\n\nnnnLOS arrayas finalmente creados",arrays)
             return arrays
 
     def local_coverage(self, features, *args, **kwargs):
@@ -198,7 +198,7 @@ class BigWigSignal(BaseSignal):
 
         if os.path.exists(self.fn + '.mmr') and not force:
             for line in open(self.fn + '.mmr'):
-                print(line)
+                #print(line)
                 if line.startswith('#'):
                     continue
                 self._readcount = float(line.strip())
@@ -218,22 +218,22 @@ class BigWigSignal(BaseSignal):
         # mapped_reads = int(stdout)
 
         mapped_reads = 0
-        print("Voy por aqui")
+        #print("Voy por aqui")
         try:
             bwFile = pyBigWig.open(self.fn)
-            print(bwFile.header())
+            #print(bwFile.header())
         except:
-            print("Error opening bigwig file")
+            #print("Error opening bigwig file")
             return self._readcount
-        print("Voy por alli")
+        #print("Voy por alli")
         for chr in bwFile.chroms():
             print(chr,type(chr))
-            print("\n\n\n\n\n\n\n",bwFile.chroms(chr))
+            ##print("\n\n\n\n\n\n\n",bwFile.chroms(chr))
             values = bwFile.values(chr,0,bwFile.chroms(chr))
             if values:
-                print("por ahora voy aqui")
+                #print("por ahora voy aqui")
                 mapped_reads += sum(1 for v in values if v!= 0)
-                print(mapped_reads)
+                #print(mapped_reads)
         # bw = pyBigWig.open(self.fn)
         # mapped_reads = 0
         # for chrom in bw.chroms():
@@ -241,7 +241,7 @@ class BigWigSignal(BaseSignal):
         #     if stats and len(stats) > 0:
         #         mapped_reads += stats[0]  # Add the first value if stats is not empty
         # bw.close()
-        print("Voy por alla")
+        #print("Voy por alla")
         # write to file so the next time you need the lib size you can access
         # it quickly
         if not os.path.exists(self.fn + '.mmr'):
@@ -385,7 +385,7 @@ class BigBedSignal(IntervalSignal):
 
         if os.path.exists(self.fn + '.mmr') and not force:
             for line in open(self.fn + '.mmr'):
-                print(line)
+                #print(line)
                 if line.startswith('#'):
                     continue
                 self._readcount = float(line.strip())
@@ -405,23 +405,23 @@ class BigBedSignal(IntervalSignal):
         # mapped_reads = int(stdout)
 
         mapped_reads = 0
-        print("Voy por aqui")
+        #print("Voy por aqui")
         try:
             bbFile = pyBigWig.open(self.fn)
             bbFile.header()
         except:
-            print("Error opening bigwig file")
+            #print("Error opening bigwig file")
             return self._readcount
-        print("Voy por alli")
+        #print("Voy por alli")
         for chr in bbFile.chroms():
-            print(chr,type(chr))
-            print("\n\n\n\n\n\n\n",bbFile.chroms(chr))
+            #print(chr,type(chr))
+            #print("\n\n\n\n\n\n\n",bbFile.chroms(chr))
             values = bbFile.values(chr,0,bbFile.chroms(chr))
             if values:
-                print("por ahora voy aqui")
+                #print("por ahora voy aqui")
                 mapped_reads += sum(1 for v in values if v!= 0)
-                print(mapped_reads)
-        print("Voy por alla")
+                #print(mapped_reads)
+        #print("Voy por alla")
         # write to file so the next time you need the lib size you can access
         # it quickly
         if not os.path.exists(self.fn + '.mmr'):

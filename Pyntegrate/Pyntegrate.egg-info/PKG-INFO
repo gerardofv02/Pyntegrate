@@ -30,3 +30,5 @@ Requires-Dist: gffutils>=0.8.2
 Requires-Dist: PyYAML>=3.10
 Requires-Dist: pybedtools>=0.6.6
 Requires-Dist: fisher
+Requires-Dist: adjustText>=1.1.1
+Requires-Dist: pyBigWig>=0.3.22

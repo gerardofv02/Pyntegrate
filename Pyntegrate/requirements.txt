@@ -11,3 +11,5 @@ gffutils>=0.8.2
 PyYAML>=3.10
 pybedtools>=0.6.6
 fisher
+adjustText>=1.1.1
+pyBigWig>=0.3.22
