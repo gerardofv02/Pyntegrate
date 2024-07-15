@@ -11,6 +11,7 @@ from .filetype_adapters import *
 import subprocess
 import os
 from importlib.resources import path
+import pandas as pd
 
 class ArgumentError(Exception):
     pass
@@ -361,6 +362,7 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
         else:  # it's a bigWig
             ##Aqui es donde cambia todo (fileadapters)
             #print("\nNBIN: ",nbin, "WINDOWlen: ", len(window),"\nWINODW: ", window, "\nWINDOW TYPE", type(window),"\nREADER: ", reader)
+            gene_name = window.name
             profile = reader.summarize(
                 window,
                 method=method,
@@ -408,6 +410,7 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
 
     stacked_xs = np.hstack(xs)
     stacked_profiles = np.hstack(profiles)
+    stacked_profiles = {"values": stacked_profiles, "gene_name": window.name}
     del xs
     del profiles
     return stacked_xs, stacked_profiles
@@ -458,6 +461,7 @@ def _count_array_parallel(fn, cls, genelist, chunksize=250, processes=1, **kwarg
             itertools.repeat(kwargs)))
     pool.close()
     pool.join()
+    print("Mis results: ",results)
     return results
 
 
@@ -496,22 +500,27 @@ def _array(fn, cls, genelist, **kwargs):
     # return
     _local_coverage_func = cls.local_coverage
     biglist = []
+    pandas_df =  pd.DataFrame(columns=['gene_name', 'values'])
     if 'bins' in kwargs:
         if isinstance(kwargs['bins'], int):
             kwargs['bins'] = [kwargs['bins']]
             #print("\n\n\n\n\n\n\n\n\n\nMy kwargs:",kwargs)
     
     # #print("\n\n\n\n\n\n\n\n\n\nMy genelist:",genelist)
-
     for gene in genelist:
         #print("\n\nGene: ", gene ,  "\n\nGeneList: ", genelist)
         if not isinstance(gene, (list, tuple)):
             # #print("\n\n\n\n\n\n\n\n\n\nMy gene:",gene)
             gene = [gene]
+            i = 0
+            for gen in gene:
+                window = tointerval(gen)
             # #print("\n\n\n\n\n\n\n\n\n\nMy gene after array it:",gene)
             ##Local covreage (arrayhelpers) sin accumulate
         coverage_x, coverage_y = _local_coverage_func(
             reader, gene, **kwargs)
+        # df_to_insert = pd.DataFrame({"gene_name": window.name , "values": coverage_y})
+        # pandas_df = pandas_df.append(df_to_insert, ignore_index=True)
         #print("\n\n\n\n\n\n\n\n\n\nMy coverage_y:",coverage_y, "\nlen of coverage: ", len(coverage_y))
         biglist.append(coverage_y)
     #print("\n\n\n\n BigList::", biglist, "Len the biglist: ", len(biglist[0]))
@@ -538,16 +547,15 @@ def remove_duplicates(fileName):
                     
 
                     ##############################################
-                    #Posición para el dato del ratón
+                    #Posición para el dato del ratón que funciona bien
                     gene_name = campo.split(' "')[4].split('"')[0]
                     ##############################################
                     break
-
+                
             if gene_name:
                 if gene_name not in gene_names_vistos:
                     gene_names_vistos.add(gene_name)
                     lineas_salida.append(linea)
-    print("\nGene names vistos:",gene_names_vistos)
     with open(fileName, 'w') as f_out:
         for linea in lineas_salida:
             f_out.write(linea)

@@ -11,6 +11,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib import gridspec
 from .colormap_adjust import *
 from scipy import stats
+import pandas as pd
 
 
 def ci_plot(x, arr, conf=0.95, ax=None, line_kwargs=None, fill_kwargs=None):
@@ -921,6 +922,36 @@ def input_ip_plots(iparr, inputarr, diffed, x, sort_ind,
     return fig
 
 
+def annotate_peaks(pandas_df):
+    # fig = plt.figure()
+    pandas_df["Annotation"] = pandas_df["Annotation"].str.replace(r'\(.*', '', regex=True)
+    unique_values = pandas_df['Annotation'].unique()
+    counts = pandas_df['Annotation'].value_counts()
+
+    labels = []
+    sizes = []
+    explodes = []
+
+
+    for value in unique_values:
+        labels.append(str(value))
+        size = counts.get(value)
+        sizes.append(size)
+
+    print("Mislabels: ", labels, "\n Mis sizes: ", sizes)
+    labels = ['Not known' if label is None else label for label in labels]
+    sizes = [0 if size is None else size for size in sizes]
+
+    print("Mislabels: ", labels, "\n Mis sizes: ", sizes)
+    fig = plt.figure(figsize=(8,8))
+    ax = plt.subplot(111)
+    plt.pie(sizes,autopct='%1.2f%%',shadow=True, radius=3)
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+    plt.legend(labels, loc="best", bbox_to_anchor=(1.0, 1.0))
+    plt.axis("equal")
+    return fig
+
 def _updatecopy(orig, update_with, keys=None, override=False):
     """
     Update a copy of dest with source.  If `keys` is a list, then only update
@@ -1111,3 +1142,5 @@ class MarginalHistScatter(object):
 
         for ax in axs:
             ax.legend(**kwargs)
+
+

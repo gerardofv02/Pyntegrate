@@ -22,7 +22,7 @@ def load_features_and_arrays(prefix, mmap_mode='r'):
         Mode in which to memory-map the file.  See np.load for details.
     """
     features = pybedtools.BedTool(prefix + '.features')
-    arrays = np.load(prefix + '.npz', mmap_mode=mmap_mode)
+    arrays = np.load(prefix + '.npz', mmap_mode=mmap_mode, allow_pickle=True)
     return features, arrays
 
 

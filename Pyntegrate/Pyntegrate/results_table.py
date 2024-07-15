@@ -1143,6 +1143,30 @@ class DEseq2ResultsPrueba(DifferentialExpressionResults):
         return fig
     
 
+    def delete_genes_no_peaks_chip(self,peaks):
+        # print(self, peaks)
+        # print(self)
+        new_df = self.data
+        # print(new_df)
+        gene_no_peaks = []
+        for x in peaks:
+            cont = 0
+            for num in x['values']:
+                cont = cont + num
+            avg = cont / len(x['values'])
+
+            if avg == 0:
+                gene_no_peaks.append(x['gene_name'])
+        
+        print("\n Antes",len(new_df))
+
+        for gene in gene_no_peaks:
+            if gene in new_df['gene_name']:
+                print(gene)
+                new_df = new_df[new_df['gene_name'] != gene]
+        print("Despues: ",len(new_df))
+        self.data = new_df
+
     def colormapped_bedfile(self, genome, cmap=None):
         """
         Create a BED file with padj encoded as color

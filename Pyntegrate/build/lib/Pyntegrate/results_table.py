@@ -1077,6 +1077,17 @@ class DEseq2ResultsPrueba(DifferentialExpressionResults):
 
     def volcano_plot(self,column_name_padj,log2FoldChange_upper, log2FoldChange_lower, nlog10_upper,text_nlog10,text_log2FoldChange):
 
+        """
+        Function prepared for deseq2 tables for plotting as a volcano plot. There you can see which genes are upregulated,downregulated or not changed
+        Params: 
+            - column_name_padj: String: Indicate which column has to be converted into the column of -nlog10
+            - log2FoldChange_upper: Number: Indicate the number for log2FoldChange to see which gene is upregulated
+            - log2FoldChange_lower: Number: Indicate the number for log2FoldChange to see which gene is downregulated
+            - nlog10upper: Number: Indicate the number for nlog10 to see which gene is upregulated or downregulated
+            - text_nlog10: Number: Indicate the number to indicate how much upper must nlog10 be for indicate the name of the gene
+            - text_log2FoldChange: Number: Indicate the number to indicate how much upper must log2FoldChange be for indicate the name of the gene
+        """
+
         self.data["gene_name"] = self.index
 
         self.data['nlog10'] = -np.log10(self.data[column_name_padj])
@@ -1131,6 +1142,30 @@ class DEseq2ResultsPrueba(DifferentialExpressionResults):
         plt.show()
         return fig
     
+
+    def delete_genes_no_peaks_chip(self,peaks):
+        # print(self, peaks)
+        # print(self)
+        new_df = self.data
+        # print(new_df)
+        gene_no_peaks = []
+        for x in peaks:
+            cont = 0
+            for num in x['values']:
+                cont = cont + num
+            avg = cont / len(x['values'])
+
+            if avg == 0:
+                gene_no_peaks.append(x['gene_name'])
+        
+        print("\n Antes",len(new_df))
+
+        for gene in gene_no_peaks:
+            if gene in new_df['gene_name']:
+                print(gene)
+                new_df = new_df[new_df['gene_name'] != gene]
+        print("Despues: ",len(new_df))
+        self.data = new_df
 
     def colormapped_bedfile(self, genome, cmap=None):
         """

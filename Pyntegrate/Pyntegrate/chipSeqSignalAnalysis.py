@@ -10,6 +10,7 @@ import multiprocessing
 import numpy as np
 import sys
 from matplotlib import pyplot as plt
+import subprocess
 
 def tss_generator(db):
     """
@@ -83,9 +84,15 @@ def generate_arrays_features_from_tsses_from_db(dbPath, ipSignalPath, extensionI
         # Normalize to library size. The values in the array
         # will be in units of "reads per million mapped reads"
         ##SExto paso
+        print(ip_array)
 
-        ip_array /= ip_signal.mapped_read_count() / 1e6
-        input_array /= input_signal.mapped_read_count() / 1e6
+        for i in ip_array:
+            i[0]['values'] /= ip_signal.mapped_read_count() / 1e6
+
+        for y in input_array:
+            y[0]['values'] /= input_signal.mapped_read_count() / 1e6
+        # ip_array /= ip_signal.mapped_read_count() / 1e6
+        # input_array /= input_signal.mapped_read_count() / 1e6
 
 
         print("Ip_array: " , ip_array)
@@ -103,6 +110,30 @@ def generate_arrays_features_from_tsses_from_db(dbPath, ipSignalPath, extensionI
     features, arrays = load_features_and_arrays(prefix='example')
     return features ,arrays ,tsses, tsses_1kb
 
+def values_array(array_ip, array_input):
+    arrays_ip = []
+    arrays_input = []
+    for x in array_ip:
+       arrays_ip.append( x[0]['values'])
+    for y in array_input:
+       arrays_input.append( y[0]['values'])
+    print(arrays_ip)
+    arrays_ip = np.array(arrays_ip)
+    arrays_input = np.array(arrays_input)
+
+    return arrays_ip, arrays_input
+
+
+def calculate_peaks_with_gene_name(arrays_ip, arrays_input):
+    normalized_subtracted = np.array([])
+    try_boolean = []
+    for index,x in enumerate(arrays_ip):
+        # print(index)
+        # print(arrays_ip)
+        normalized_subtracted = np.append(normalized_subtracted,{ 'values': arrays_ip[index][0]['values']-arrays_input[index][0]['values'], 'gene_name': arrays_ip[index][0]['gene_name']})
+
+
+    return normalized_subtracted
 
 
 def calculate_peaks(arrays_ip, arrays_input):
@@ -170,3 +201,79 @@ def distance_from_tss_chipSeq(arrays_ip, arrays_input):
     ax.set_ylabel('Average read coverage (per million mapped reads)')
     ax.legend(loc='best')
     return fig
+
+
+##Hacer que homer lo instale el propio usuario
+def create_homer_tag_directory(name,file):
+    subprocess.run(["makeTagDirectory",name,file])
+    return
+
+
+def homer_peaks(tag_directory,style="factor",output="auto"):
+    print(output,style)
+
+    subprocess.run(["findPeaks", tag_directory, "-style",style,"-o",output])
+    return
+
+def homer_annotate_peaks(file_directory,gene, output):
+
+    with open(output, "w") as out_file, open("logs.log", "w") as err_file:
+        subprocess.run(["annotatePeaks.pl", file_directory, gene], stdout=out_file, stderr=err_file)
+
+
+
+def genes_not_used_with_rna(tsses, data, normalized_subtracted):
+
+    """
+    Function to delete the genes not used in both data (chip and rna). Need to use this function to analyse both them together because
+    having more genes can have problems with array length. Important to be in the same order normalized_subtracted and tsses because 
+    index are used
+
+    Params: 
+        -tsses: Pybedtool class where there is chip-seq data
+        -data: DEseq2ResultsPrueba class where there is rna-seq data
+        -normalized_subtracted: Array where have the chip-seq peaks calculated
+    """
+    df2 = tsses.to_dataframe()
+    print(df2)
+    gene_used = []
+    gene_not_used_chip = []
+    indexs = []
+    values_not_data = []
+    for idx,value in enumerate(df2.values):
+        if value[8].split(";")[3].split(" ")[2].split('"')[1] in data.index:
+            indexs.append(idx)
+            gene_used.append(value[8].split(";")[3].split(" ")[2].split('"')[1])
+        else:
+            gene_not_used_chip.append(value[8].split(";")[3].split(" ")[2].split('"')[1])
+
+
+    with open("genes_not_used_chip_seq.log", "w") as chip_log:
+        for gene in gene_not_used_chip:
+            chip_log.write(f"{gene}\n")
+
+    for value_data in data.index:
+        if value_data not in gene_used:
+            values_not_data.append(value_data)
+
+    with open("genes_not_used_rna_seq.log", "w") as rna_log:
+        for gene in values_not_data:
+            rna_log.write(f"{gene}\n")
+
+    print("\nGenes_not_used_rna-seq: ",values_not_data)
+    normalized_subtracted_good= []
+    ##For put good normalized subtracted
+    for i in range(len(normalized_subtracted)):
+        if i in indexs:
+            normalized_subtracted_good.append(normalized_subtracted[i])
+    ##FOr deseq2
+    data = data.drop(values_not_data)
+
+    normalized_subtracted= np.array(normalized_subtracted_good) 
+    print("Normalized subtract len: ", len(normalized_subtracted))
+
+    return normalized_subtracted,data
+
+    # data2['log2FoldChange'] = data["fpkm"]
+    # print("Len data2: ",len(data2), "DAta2: ",data2)
+    # print("\n\nlen data: ",len(data), "Data: ", data)

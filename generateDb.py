@@ -4,4 +4,4 @@ import gffutils
 path = os.path.dirname(os.path.abspath(__file__))
 print(path)
 
-db = gffutils.create_db(data=path+"/data/gencode.vM25.annotation_lowdata.gtf",dbfn=path+"/data/gencode.vM25.annotation_lowdata.gtf.db")
+db = gffutils.create_db(data=path+"/datos/gencode.vM34.annotation.gtf",dbfn=path+"/datos/gencode.vM25.annotation.gtf.db")

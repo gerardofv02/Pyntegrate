@@ -1,0 +1,9 @@
+Intergenic
+intron 
+promoter-TSS 
+non-coding 
+3' UTR 
+exon 
+TTS 
+5' UTR 
+nan
