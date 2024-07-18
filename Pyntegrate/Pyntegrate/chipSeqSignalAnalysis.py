@@ -11,6 +11,7 @@ import numpy as np
 import sys
 from matplotlib import pyplot as plt
 import subprocess
+from .plotutils import *
 
 def tss_generator(db):
     """
@@ -151,7 +152,7 @@ def calculate_peaks(arrays_ip, arrays_input):
     return peaks
 
 
-def distance_from_tss_chipSeq(arrays_ip, arrays_input):
+def distance_from_tss_chipSeq(arrays_ip, arrays_input, name=""):
 
     """
     Function to show in a graphic the distance of IP signal data and INPUT signal data from the TSS.
@@ -200,6 +201,7 @@ def distance_from_tss_chipSeq(arrays_ip, arrays_input):
     ax.set_xlabel('Distance from TSS (bp)')
     ax.set_ylabel('Average read coverage (per million mapped reads)')
     ax.legend(loc='best')
+    ax.set_title(name)
     return fig
 
 
@@ -277,3 +279,135 @@ def genes_not_used_with_rna(tsses, data, normalized_subtracted):
     # data2['log2FoldChange'] = data["fpkm"]
     # print("Len data2: ",len(data2), "DAta2: ",data2)
     # print("\n\nlen data: ",len(data), "Data: ", data)
+
+def bigwigToBed(bwFile, bedNameFile):
+    bwFile = pyBigWig.open(bwFile)
+    chroms = bwFile.chroms()
+    
+    bed_data = []
+    i = 0
+    
+    for chrom in chroms:
+        intervals = bwFile.intervals(chrom)
+        for start, end, value  in intervals:
+            bed_data.append([chrom, start, end, i, value, ""])
+            i += 1
+    
+    bed_df = pd.DataFrame(bed_data, columns=["chrom", "start", "end", "ID", "value", ""])
+    bed_df.to_csv(bedNameFile, sep='\t', header=True, index=False)
+
+def array_gene_name_and_annotation(bedFile_ip, bedFile_input,gene, arrays_ip, arrays_input):
+
+    df_ip = pd.read_csv((bedFile_ip+".txt"), delimiter="\t")
+    df_input = pd.read_csv((bedFile_input+".txt"), delimiter="\t")
+    df_ip["Annotation"] = df_ip["Annotation"].str.replace(r'\(.*', '', regex=True)
+    unique_values_ip = df_ip['Annotation'].unique()
+    df_input["Annotation"] = df_input["Annotation"].str.replace(r'\(.*', '', regex=True)
+    unique_values_input = df_input['Annotation'].unique()
+
+    print("input",unique_values_input, "IP",unique_values_ip)
+
+    array_gene_annotation_ip = []
+    array_gene_annotation_input = []
+    for idx, row in df_ip.iterrows():
+        array_gene_annotation_ip.append({"gene_name": row['Gene Name'], "annotation": row['Annotation']})
+    for idx, row in df_input.iterrows():
+        array_gene_annotation_input.append({"gene_name": row['Gene Name'], "annotation": row['Annotation']})
+
+
+    df_ip = {key:[] for key in unique_values_ip}
+    df_input = {key:[] for key in unique_values_input}
+
+    for x in arrays_ip:
+        for y in array_gene_annotation_ip:
+            if x[0]['gene_name'] == y['gene_name']:
+                df_ip[y['annotation']].append(x[0]['values'])
+                break
+
+    for i in arrays_input:
+        for j in array_gene_annotation_input:
+            if i[0]['gene_name'] == j['gene_name']:
+                df_input[j['annotation']].append(i[0]['values'])
+                break
+    print(df_input, df_ip)
+
+    for key in df_ip:
+        df_ip[key] = np.array(df_ip[key])
+    for key in df_input:
+        df_input[key] = np.array(df_input[key])
+
+    for key in df_ip:
+        if len(df_ip[key]) == 0 or len(df_input[key]) == 0:
+            continue
+        else:
+            fig = distance_from_tss_chipSeq(arrays_ip=df_ip[key], arrays_input=df_input[key], name=key)
+
+    plt.show()
+
+    df_normalized_subtracted = {}
+
+    for key in df_ip:
+        if len(df_ip[key]) == 0 or len(df_input[key]) == 0:
+            continue
+        else:
+            df_normalized_subtracted[key] = df_ip[key] - df_input[key]
+
+    
+    for key in df_normalized_subtracted:
+        
+        fig = imshow(
+        df_normalized_subtracted[key],
+        x=x,
+        figsize=(3, 7),
+        percentile=True,
+        vmin=5,
+        vmax=99,
+        line_kwargs=dict(color='k', label='All'),
+        fill_kwargs=dict(color='k', alpha=0.3),
+        )
+
+
+
+        fig = imshow(
+            df_normalized_subtracted[key],
+            x=x,
+            figsize=(3, 7),
+            vmin=5, vmax=99,  percentile=True,
+            line_kwargs=dict(color='k', label='All'),
+            fill_kwargs=dict(color='k', alpha=0.3),
+            sort_by=df_normalized_subtracted[key].mean(axis=1)
+        )
+
+        fig = imshow(
+            df_normalized_subtracted[key],
+            x=x,
+            figsize=(3, 7),
+            vmin=5, vmax=99,  percentile=True,
+            line_kwargs=dict(color='k', label='All'),
+            fill_kwargs=dict(color='k', alpha=0.3),
+            sort_by=np.argmax(df_normalized_subtracted[key], axis=1)
+        )
+
+
+
+        fig = imshow(
+            df_normalized_subtracted[key],
+            x=x,
+            figsize=(3, 7),
+            vmin=5, vmax=99,  percentile=True,
+            line_kwargs=dict(color='k', label='All'),
+            fill_kwargs=dict(color='k', alpha=0.3),
+            sort_by=df_normalized_subtracted[key].mean(axis=1)
+        )
+
+        print("AHora viene: ", key)
+
+        plt.show()
+
+    
+
+    
+
+
+
+    
