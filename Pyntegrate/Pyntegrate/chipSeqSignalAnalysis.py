@@ -33,81 +33,45 @@ def generate_arrays_features_from_tsses_from_db(dbPath, ipSignalPath, extensionI
         - extensionInput: String: Type of the file of the INPUT signal data file example:('bigwig','bam','bed',...)
         - genome: String: The genome of the CHIP-seq data we want to analyze. Example: ('hg19','hg38',...)
     """
-    
-    ##Primer paso 
-    db = gffutils.FeatureDB(dbPath) #Primer paso
+
+    db = gffutils.FeatureDB(dbPath)
     tsses = pybedtools.BedTool(tss_generator(db)).saveas('tsses.gtf')
 
     remove_duplicates("tsses.gtf")
     tsses = pybedtools.BedTool("tsses.gtf")
     tsses_1kb = tsses.slop(b=1000, genome=genome, output='tsses-1kb.gtf')
-    
 
-
-    ##Segundo paso
     ip_signal = genomic_signal(ipSignalPath,extensionIp)
     input_signal = genomic_signal(inputSignalPath,extensionInput)
-    
-    
-    
+
+
+
 
     print(ip_signal,input_signal)
     processes = multiprocessing.cpu_count()
     if not os.path.exists('example.npz'):
 
-        ##Tercer paso
-
-        # The signal is the IP ChIP-seq BAM file.
         ip_array = ip_signal.array(
-
-            # Look at signal over these windows
             tsses_1kb,
-
-            # Bin signal into this many bins per window
             bins=100,
-
-            # Use multiple CPUs. Dramatically speeds up run time.
             processes=processes)
-
-        # print(ip_array[0][:10])
-        # Do the same thing for input.
-
-        ##Cuartopaso
         input_array = input_signal.array(
             tsses_1kb,
             bins=100,
             processes=processes)
-
-        # print(input_array[:10])
-
-
-
-        # Normalize to library size. The values in the array
-        # will be in units of "reads per million mapped reads"
-        ##SExto paso
-        print(ip_array)
 
         for i in ip_array:
             i[0]['values'] /= ip_signal.mapped_read_count() / 1e6
 
         for y in input_array:
             y[0]['values'] /= input_signal.mapped_read_count() / 1e6
-        # ip_array /= ip_signal.mapped_read_count() / 1e6
-        # input_array /= input_signal.mapped_read_count() / 1e6
-
-
-        print("Ip_array: " , ip_array)
-        print("Input_array: " , input_array)
-
-        ##SExto paso
-        # Cache to disk. The data will be saved as "example.npz" and "example.features".
         save_features_and_arrays(
             features=tsses,
             arrays={'ip': ip_array, 'input': input_array},
             prefix='example',
             link_features=True,
             overwrite=True)
-
+        
     features, arrays = load_features_and_arrays(prefix='example')
     return features ,arrays ,tsses, tsses_1kb
 
@@ -118,7 +82,7 @@ def values_array(array_ip, array_input):
        arrays_ip.append( x[0]['values'])
     for y in array_input:
        arrays_input.append( y[0]['values'])
-    print(arrays_ip)
+    # print(arrays_ip)
     arrays_ip = np.array(arrays_ip)
     arrays_input = np.array(arrays_input)
 
@@ -131,7 +95,12 @@ def calculate_peaks_with_gene_name(arrays_ip, arrays_input):
     for index,x in enumerate(arrays_ip):
         # print(index)
         # print(arrays_ip)
-        normalized_subtracted = np.append(normalized_subtracted,{ 'values': arrays_ip[index][0]['values']-arrays_input[index][0]['values'], 'gene_name': arrays_ip[index][0]['gene_name']})
+        normalized_subtracted = np.append(normalized_subtracted,{ 'values': arrays_ip[index][0]['values']-arrays_input[index][0]['values'],
+                                                                  'gene_name': arrays_ip[index][0]['gene_name'],
+                                                                  'chr': arrays_ip[index][0]['chr'],
+                                                                  'start': arrays_ip[index][0]['start'],
+                                                                  'end': arrays_ip[index][0]['end'],
+                                                                  'strand': arrays_ip[index][0]['strand']})
 
 
     return normalized_subtracted
@@ -162,42 +131,22 @@ def distance_from_tss_chipSeq(arrays_ip, arrays_input, name=""):
     """
 
     x = np.linspace(-1000, 1000, 100)
-
-
-    # Create a figure and axes
     fig = plt.figure()
     ax = fig.add_subplot(111)
-
-
-    # Plot the IP:
     ax.plot(
-        # use the x-axis values we created
         x,
-
-        # axis=0 takes the column-wise mean, so with
-        # 100 columns we'll have 100 means to plot
         arrays_ip.mean(axis=0),
-
-        # Make it red
         color='r',
-
-        # Label to show up in legend
         label='IP')
 
-
-    # Do the same thing with the input
     ax.plot(
         x,
         arrays_input.mean(axis=0),
         color='k',
         label='input')
 
-
-    # Add a vertical line at the TSS, at position 0
     ax.axvline(0, linestyle=':', color='k')
 
-
-    # Add labels and legend
     ax.set_xlabel('Distance from TSS (bp)')
     ax.set_ylabel('Average read coverage (per million mapped reads)')
     ax.legend(loc='best')
@@ -228,10 +177,10 @@ def genes_not_used_with_rna(tsses, data, normalized_subtracted):
 
     """
     Function to delete the genes not used in both data (chip and rna). Need to use this function to analyse both them together because
-    having more genes can have problems with array length. Important to be in the same order normalized_subtracted and tsses because 
+    having more genes can have problems with array length. Important to be in the same order normalized_subtracted and tsses because
     index are used
 
-    Params: 
+    Params:
         -tsses: Pybedtool class where there is chip-seq data
         -data: DEseq2ResultsPrueba class where there is rna-seq data
         -normalized_subtracted: Array where have the chip-seq peaks calculated
@@ -271,7 +220,7 @@ def genes_not_used_with_rna(tsses, data, normalized_subtracted):
     ##FOr deseq2
     data = data.drop(values_not_data)
 
-    normalized_subtracted= np.array(normalized_subtracted_good) 
+    normalized_subtracted= np.array(normalized_subtracted_good)
     print("Normalized subtract len: ", len(normalized_subtracted))
 
     return normalized_subtracted,data
@@ -283,20 +232,22 @@ def genes_not_used_with_rna(tsses, data, normalized_subtracted):
 def bigwigToBed(bwFile, bedNameFile):
     bwFile = pyBigWig.open(bwFile)
     chroms = bwFile.chroms()
-    
+
     bed_data = []
     i = 0
-    
+
     for chrom in chroms:
         intervals = bwFile.intervals(chrom)
         for start, end, value  in intervals:
             bed_data.append([chrom, start, end, i, value, ""])
             i += 1
-    
+
     bed_df = pd.DataFrame(bed_data, columns=["chrom", "start", "end", "ID", "value", ""])
     bed_df.to_csv(bedNameFile, sep='\t', header=True, index=False)
 
 def array_gene_name_and_annotation(bedFile_ip, bedFile_input,gene, arrays_ip, arrays_input):
+
+    print(len(arrays_ip), len(arrays_input))
 
     df_ip = pd.read_csv((bedFile_ip+".txt"), delimiter="\t")
     df_input = pd.read_csv((bedFile_input+".txt"), delimiter="\t")
@@ -329,12 +280,15 @@ def array_gene_name_and_annotation(bedFile_ip, bedFile_input,gene, arrays_ip, ar
             if i[0]['gene_name'] == j['gene_name']:
                 df_input[j['annotation']].append(i[0]['values'])
                 break
-    print(df_input, df_ip)
+    # print(df_input, df_ip)
 
     for key in df_ip:
         df_ip[key] = np.array(df_ip[key])
     for key in df_input:
         df_input[key] = np.array(df_input[key])
+
+    print("Cantidad de vecees de elementos IP: \n", len(df_ip["exon"]))
+    print("\nCantidad de vecees de elementos INPUT:\n ", len(df_input["exon"]))
 
     for key in df_ip:
         if len(df_ip[key]) == 0 or len(df_input[key]) == 0:
@@ -350,11 +304,14 @@ def array_gene_name_and_annotation(bedFile_ip, bedFile_input,gene, arrays_ip, ar
         if len(df_ip[key]) == 0 or len(df_input[key]) == 0:
             continue
         else:
-            df_normalized_subtracted[key] = df_ip[key] - df_input[key]
+            print(len(df_ip[key]),len(df_input[key]) , df_input[key])
+            df_normalized_subtracted[key] = calculate_peaks(df_ip[key] , df_input[key])
 
-    
+    print (df_normalized_subtracted)
+
+
     for key in df_normalized_subtracted:
-        
+
         fig = imshow(
         df_normalized_subtracted[key],
         x=x,
@@ -404,10 +361,103 @@ def array_gene_name_and_annotation(bedFile_ip, bedFile_input,gene, arrays_ip, ar
 
         plt.show()
 
+
+
+def array_gene_name_and_annotation_2(normalized_subtracted):
+    bed_data = []
+    i = 0
+    for e in normalized_subtracted:
+        i +=1
+        bed_data.append([e['chr'], e['start'], e['end'], i ])
+    
+    df_bed = pd.DataFrame(bed_data, columns=['chr', 'start', 'end', 'ID'])
+    df_bed.to_csv("normalized_subtracted.bed",sep='\t', header=True, index=False)
+    homer_annotate_peaks(file_directory="normalized_subtracted.bed",gene="mm10", output="normalized_subtracted.bed.txt")
+    df_homer = pd.read_csv("normalized_subtracted.bed.txt",delimiter="\t")
+    print(df_homer)
+    df_homer["Annotation"] = df_homer["Annotation"].str.replace(r'\(.*', '', regex=True)
+    print(df_homer)
+    unique_values_homer = df_homer["Annotation"].unique()
+    array_gene_annotation = []
+    for idx, row in df_homer.iterrows():
+        print(row['Annotation'])
+        array_gene_annotation.append({"gene_name": row['Gene Name'], "annotation": row['Annotation']})
+
+    df_homer_total = {key:[] for key in unique_values_homer}
+
+    for x in normalized_subtracted:
+        for y in array_gene_annotation:
+            if x['gene_name'] == y['gene_name']:
+                df_homer_total[y['annotation']].append(x['values'])
+                break
+    x = np.linspace(-1000, 1000, 100)
+    for key in df_homer_total:
+
+        if len(df_homer_total[key]) == 0:
+            continue
+        
+        else:
+            df_homer_total[key] = np.array(df_homer_total[key])
+
+            fig = imshow(
+            df_homer_total[key],
+            x=x,
+            figsize=(3, 7),
+            percentile=True,
+            vmin=5,
+            vmax=99,
+            line_kwargs=dict(color='k', label='All'),
+            fill_kwargs=dict(color='k', alpha=0.3),
+            )
+
+
+
+            fig = imshow(
+                df_homer_total[key],
+                x=x,
+                figsize=(3, 7),
+                vmin=5, vmax=99,  percentile=True,
+                line_kwargs=dict(color='k', label='All'),
+                fill_kwargs=dict(color='k', alpha=0.3),
+                sort_by=df_homer_total[key].mean(axis=1)
+            )
+
+            fig = imshow(
+                df_homer_total[key],
+                x=x,
+                figsize=(3, 7),
+                vmin=5, vmax=99,  percentile=True,
+                line_kwargs=dict(color='k', label='All'),
+                fill_kwargs=dict(color='k', alpha=0.3),
+                sort_by=np.argmax(df_homer_total[key], axis=1)
+            )
+
+
+
+            fig = imshow(
+                df_homer_total[key],
+                x=x,
+                figsize=(3, 7),
+                vmin=5, vmax=99,  percentile=True,
+                line_kwargs=dict(color='k', label='All'),
+                fill_kwargs=dict(color='k', alpha=0.3),
+                sort_by=df_homer_total[key].mean(axis=1)
+            )
+
+            print("AHora viene: ", key)
+
+            plt.show()
+            
+
+
+    print(normalized_subtracted,df_homer_total)
+
     
 
-    
 
 
 
-    
+
+
+
+

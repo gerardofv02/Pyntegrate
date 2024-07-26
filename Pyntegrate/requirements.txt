@@ -1,6 +1,6 @@
 scipy==1.11.4
 biopython==1.83
-scikit-learn==1.4.1
+scikit-learn==1.4.1.post1
 bx-python==0.10.0
 Cython==3.0.8
 numpy==1.26.3

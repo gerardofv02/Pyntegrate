@@ -21,7 +21,7 @@ print(path)
 
 features, arrays ,tsses , tsses_1kb = Pyntegrate.chipSeqSignalAnalysis.generate_arrays_features_from_tsses_from_db(os.path.join(path, 'data/gencode.vM25.annotation.gtf.db'), os.path.join(path, 'BamFiles/SRR1204544_sort_nondup.bw'),'bigwig',os.path.join(path, 'BamFiles/SRR1204546_sort_nondup.bw'),'bigwig',genome = "mm10")
 
-print("\nArrays: ",arrays['ip'])
+print("\nArrays: ",len(arrays['ip']), len(arrays['input']))
 # # # db = gffutils.create_db(data=path+"/Homo_sapiens.GRCh38.109.gtf",dbfn=path+"/data/Homo_sapiens.GRCh38.109.gtf.db")
 # # db = gffutils.create_db(data=path+"/prueba.gtf",dbfn=path+"/data/prueba.gtf.db")
 
@@ -152,13 +152,14 @@ x = np.linspace(-1000, 1000, 100)
 # ax.set_ylabel('Average read coverage (per million mapped reads)')
 # ax.legend(loc='best')
 
-print(arrays)
+# print(arrays)
 
 arrays_ip_complete = arrays['ip']
 arrays_input_complete = arrays['input']
+print(arrays['ip'][0])
 
 mis_array_ip ,mis_array_input = Pyntegrate.chipSeqSignalAnalysis.values_array(arrays_ip_complete, arrays_input_complete)
-print(mis_array_ip)
+
 # fig = Pyntegrate.chipSeqSignalAnalysis.distance_from_tss_chipSeq(arrays_ip = mis_array_ip, arrays_input=mis_array_input)
 # ##################################################################
 
@@ -170,7 +171,7 @@ print(mis_array_ip)
 normalized_subtracted= Pyntegrate.chipSeqSignalAnalysis.calculate_peaks(arrays_ip=mis_array_ip,arrays_input= mis_array_input)
 normalized_subtracted_de_cero = Pyntegrate.chipSeqSignalAnalysis.calculate_peaks_with_gene_name(arrays['ip'],arrays['input'])
 ################################
-print("Type of normaliz subtracted before all", type(normalized_subtracted), normalized_subtracted)
+# print("Type of normaliz subtracted before all", type(normalized_subtracted), normalized_subtracted)
 # Tweak some font settings so the results look nicer
 # plt.rcParams['font.family'] = 'Arial'
 plt.rcParams['font.size'] = 10

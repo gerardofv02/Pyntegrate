@@ -73,6 +73,8 @@ if not os.path.exists('example.npz'):
     # will be in units of "reads per million mapped reads"
 
     print(ip_signal.mapped_read_count())
+
+    ip_array, input_array = Pyntegrate.chipSeqSignalAnalysis.values_array(ip_array,input_array)
     
     mapped_count = ip_signal.mapped_read_count()
 
@@ -92,61 +94,62 @@ if not os.path.exists('example.npz'):
         overwrite=True)
 
 
-# features, arrays = Pyntegrate.persistence.load_features_and_arrays(prefix='example')
+features, arrays = Pyntegrate.persistence.load_features_and_arrays(prefix='example')
 
-# # How many features?
-# assert len(features) == 5708
+print(arrays['ip'].shape)
+# How many features?
+assert len(features) == 5708
 
-# # This ought to be exactly the same as the number of features in `tsses_1kb.gtf`
-# assert len(features) == len(tsses_1kb) == 5708
+# This ought to be exactly the same as the number of features in `tsses_1kb.gtf`
+assert len(features) == len(tsses_1kb) == 5708
 
-# # This shows that `arrays` acts like a dictionary
-# assert sorted(arrays.keys()) == ['input', 'ip']
+# This shows that `arrays` acts like a dictionary
+assert sorted(arrays.keys()) == ['input', 'ip']
 
-# # This shows that the IP and input arrays have one row per feature, and one column per bin
-# assert arrays['ip'].shape == (5708, 100) == arrays['input'].shape
+# This shows that the IP and input arrays have one row per feature, and one column per bin
+assert arrays['ip'].shape == (5708, 100) == arrays['input'].shape
 
-# x = np.linspace(-1000, 1000, 100)
+x = np.linspace(-1000, 1000, 100)
 
-# # Create a figure and axes
-# fig = plt.figure()
-# ax = fig.add_subplot(111)
-
-
-# # Plot the IP:
-# ax.plot(
-#     # use the x-axis values we created
-#     x,
-
-#     # axis=0 takes the column-wise mean, so with
-#     # 100 columns we'll have 100 means to plot
-#     arrays['ip'].mean(axis=0),
-
-#     # Make it red
-#     color='r',
-
-#     # Label to show up in legend
-#     label='IP')
+# Create a figure and axes
+fig = plt.figure()
+ax = fig.add_subplot(111)
 
 
-# # Do the same thing with the input
-# ax.plot(
-#     x,
-#     arrays['input'].mean(axis=0),
-#     color='k',
-#     label='input')
+# Plot the IP:
+ax.plot(
+    # use the x-axis values we created
+    x,
+
+    # axis=0 takes the column-wise mean, so with
+    # 100 columns we'll have 100 means to plot
+    arrays['ip'].mean(axis=0),
+
+    # Make it red
+    color='r',
+
+    # Label to show up in legend
+    label='IP')
 
 
-# # Add a vertical line at the TSS, at position 0
-# ax.axvline(0, linestyle=':', color='k')
+# Do the same thing with the input
+ax.plot(
+    x,
+    arrays['input'].mean(axis=0),
+    color='k',
+    label='input')
 
 
-# # Add labels and legend
-# ax.set_xlabel('Distance from TSS (bp)')
-# ax.set_ylabel('Average read coverage (per million mapped reads)')
-# ax.legend(loc='best')
+# Add a vertical line at the TSS, at position 0
+ax.axvline(0, linestyle=':', color='k')
 
-# #plt.show()
+
+# Add labels and legend
+ax.set_xlabel('Distance from TSS (bp)')
+ax.set_ylabel('Average read coverage (per million mapped reads)')
+ax.legend(loc='best')
+
+plt.show()
 
 # normalized_subtracted = arrays['ip'] - arrays['input']
 

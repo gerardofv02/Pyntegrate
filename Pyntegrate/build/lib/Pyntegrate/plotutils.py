@@ -644,7 +644,6 @@ def clustered_sortind(x,random_state, k=10, scorefunc=None):
         init_size=None, max_iter=100, max_no_improvement=10, n_clusters=best_k,
         n_init=3, random_state=random_state, reassignment_ratio=0.01, tol=0.0,
         verbose=0)
-    print(mbk)
     mbk.fit(x)
     k = best_k
     labels = mbk.labels_

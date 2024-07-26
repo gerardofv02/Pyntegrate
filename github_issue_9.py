@@ -20,9 +20,11 @@ for i, f in enumerate(features):
 genes = np.array(genes)
 arr = gs.array(features, processes=multiprocessing.cpu_count(), bins=100)
 
+arr1, arr2 = Pyntegrate.chipSeqSignalAnalysis.values_array(arr,arr)
+print(arr)
 # At this point, each item in `genes` corresponds to the same row in `arr`
 
-ind, breaks = Pyntegrate.plotutils.clustered_sortind(arr, random_state=1, k=5)
+ind, breaks = Pyntegrate.plotutils.clustered_sortind(arr1, random_state=1, k=5)
 
 # print("ind: ",ind)
 # print("breaks: ", breaks)
@@ -53,12 +55,12 @@ for b in breaks:
 # Plot everything
 fig = plt.figure()
 ax1 = fig.add_subplot(121)
-ax1.matshow(arr, cmap=matplotlib.cm.hot)
+ax1.matshow(arr1, cmap=matplotlib.cm.hot)
 ax1.set_title('unclustered')
 ax1.axis('tight')
 
 ax2 = fig.add_subplot(122)
-ax2.matshow(arr[ind], cmap=matplotlib.cm.hot)
+ax2.matshow(arr1[ind], cmap=matplotlib.cm.hot)
 ax2.set_title('clustered, k=5')
 for b in breaks:
     ax2.axhline(b, color='b')

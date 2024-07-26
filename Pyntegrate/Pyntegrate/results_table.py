@@ -1075,7 +1075,7 @@ class DEseq2ResultsPrueba(DifferentialExpressionResults):
     lfc_column = 'log2FoldChange'
     mean_column = 'baseMean'
 
-    def volcano_plot(self,column_name_padj,log2FoldChange_upper, log2FoldChange_lower, nlog10_upper,text_nlog10,text_log2FoldChange):
+    def volcano_plot(self,column_name_padj,log2FoldChange_upper=1.5, log2FoldChange_lower=-1.5, nlog10_upper=2,text_nlog10=None,text_log2FoldChange=None):
 
         """
         Function prepared for deseq2 tables for plotting as a volcano plot. There you can see which genes are upregulated,downregulated or not changed
@@ -1092,7 +1092,11 @@ class DEseq2ResultsPrueba(DifferentialExpressionResults):
 
         self.data['nlog10'] = -np.log10(self.data[column_name_padj])
 
-        self.data['color'] = self.data[['log2FoldChange', 'nlog10']].apply(map_color, axis = 1,down_log2FoldChange=log2FoldChange_lower,upper_log2FoldChange=log2FoldChange_upper,upper_nlog10=nlog10_upper)
+        self.data['color'] = self.data[['log2FoldChange', 'nlog10']].apply(map_color,
+                                                                            axis = 1,
+                                                                            down_log2FoldChange=log2FoldChange_lower
+                                                                            ,upper_log2FoldChange=log2FoldChange_upper
+                                                                            ,upper_nlog10=nlog10_upper)
         print(self.head())
         fig = plt.figure(figsize = (8,6))
 
@@ -1106,13 +1110,16 @@ class DEseq2ResultsPrueba(DifferentialExpressionResults):
         ax.axvline(log2FoldChange_lower, zorder = 0, c = 'k', lw = 2, ls = '--') ##Tamaño de log2foldChange lower
 
         # Gene names in the graph
-        texts = []
-        for i in range(len(self.data)):
-            if self.data.iloc[i]['nlog10'] > text_nlog10 and abs(self.data.iloc[i]["log2FoldChange"]) > text_log2FoldChange:
-                texts.append(plt.text(x = self.data.iloc[i]["log2FoldChange"], y = self.data.iloc[i]["nlog10"], s = self.data.iloc[i]["gene_name"],
-                                    fontsize = 12, weight = 'bold'))
-        # Arrows to the dots         
-        adjust_text(texts, arrowprops = dict(arrowstyle = '-', color = 'k'))
+        if text_log2FoldChange == None or text_nlog10 == None:
+            print("No texts required")
+        else:
+            texts = []
+            for i in range(len(self.data)):
+                if self.data.iloc[i]['nlog10'] > text_nlog10 and abs(self.data.iloc[i]["log2FoldChange"]) > text_log2FoldChange:
+                    texts.append(plt.text(x = self.data.iloc[i]["log2FoldChange"], y = self.data.iloc[i]["nlog10"], s = self.data.iloc[i]["gene_name"],
+                                        fontsize = 12, weight = 'bold'))
+            # Arrows to the dots         
+            adjust_text(texts, arrowprops = dict(arrowstyle = '-', color = 'k'))
 
         # Legend position
         plt.legend(loc = 1, bbox_to_anchor = (1.4,1), frameon = False, prop = {'weight':'bold'})
@@ -1134,12 +1141,6 @@ class DEseq2ResultsPrueba(DifferentialExpressionResults):
         # Axis labels
         plt.xlabel("$log_{2}$ fold change", size = 15)
         plt.ylabel("-$log_{10}$ FDR", size = 15)
-
-        # Save figure
-        #plt.savefig('./Volcano_plots/Garcia_et_al_seaborn.png', dpi = 300, bbox_inches = 'tight', facecolor = 'white')
-
-        # Plot figure
-        plt.show()
         return fig
     
 

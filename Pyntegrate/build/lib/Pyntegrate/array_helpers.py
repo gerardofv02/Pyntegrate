@@ -410,7 +410,12 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
 
     stacked_xs = np.hstack(xs)
     stacked_profiles = np.hstack(profiles)
-    stacked_profiles = {"values": stacked_profiles, "gene_name": window.name}
+    stacked_profiles = {"values": stacked_profiles, 
+                        "gene_name": window.name, 
+                        "chr": window.chrom, 
+                        "start": window.start, 
+                        "end": window.end, 
+                        "strand": window.strand}
     del xs
     del profiles
     return stacked_xs, stacked_profiles
