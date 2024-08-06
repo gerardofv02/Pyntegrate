@@ -363,6 +363,7 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
             ##Aqui es donde cambia todo (fileadapters)
             #print("\nNBIN: ",nbin, "WINDOWlen: ", len(window),"\nWINODW: ", window, "\nWINDOW TYPE", type(window),"\nREADER: ", reader)
             gene_name = window.name
+            # print(window)
             profile = reader.summarize(
                 window,
                 method=method,
@@ -410,12 +411,23 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
 
     stacked_xs = np.hstack(xs)
     stacked_profiles = np.hstack(profiles)
+    if(window.name):
+        name = window.name
+    else:
+        name = "."
+    # print(window.fields[8].split('"')[1])
+    ##Mirar bien lo de otherfields
+    if(window.fields[8].split('"')[1]):
+        id = window.fields[8].split('"')[1]
+    else:
+        id = "."
     stacked_profiles = {"values": stacked_profiles, 
-                        "gene_name": window.name, 
+                        "gene_name": name, 
                         "chr": window.chrom, 
                         "start": window.start, 
                         "end": window.end, 
-                        "strand": window.strand}
+                        "strand": window.strand,
+                        "id": id}
     del xs
     del profiles
     return stacked_xs, stacked_profiles
@@ -449,6 +461,8 @@ def _array_parallel(fn, cls, genelist, chunksize=250, processes=1, **kwargs):
             itertools.repeat(cls),
             chunks,
             itertools.repeat(kwargs)))
+    
+    # print("MIs results:", results)
     pool.close()
     pool.join()
     return results
@@ -524,6 +538,7 @@ def _array(fn, cls, genelist, **kwargs):
             ##Local covreage (arrayhelpers) sin accumulate
         coverage_x, coverage_y = _local_coverage_func(
             reader, gene, **kwargs)
+        # print(coverage_y)
         # df_to_insert = pd.DataFrame({"gene_name": window.name , "values": coverage_y})
         # pandas_df = pandas_df.append(df_to_insert, ignore_index=True)
         #print("\n\n\n\n\n\n\n\n\n\nMy coverage_y:",coverage_y, "\nlen of coverage: ", len(coverage_y))

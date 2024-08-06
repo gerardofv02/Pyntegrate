@@ -41,6 +41,16 @@ class BaseAdapter(object):
     def make_fileobj(self):
         raise ValueError('Subclasses must define make_fileobj')
 
+class NarrowPeakAdapter(BaseAdapter):
+    """
+    Adapter that provides random access to narrowPeaks objects using Pybedtools.Bedtool
+    """
+    def __init__(self, fn):
+        super(NarrowPeakAdapter, self).__init__(fn)
+
+    def make_fileobj(self):
+        return pybedtools.bedtool.BedTool(self.fn, 'rb')
+
 
 class BamAdapter(BaseAdapter):
     """

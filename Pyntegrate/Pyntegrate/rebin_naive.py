@@ -1,19 +1,19 @@
-from numpy import *
+import numpy as np
 from math import floor
 
 #          0   1   2   3   4   5   6   7   8   9
-y = array([0,  0,  1,  2,  2,  1,  1,  0,  0,  0])
+y = np.array([0,  0,  1,  2,  2,  1,  1,  0,  0,  0])
 # bins=5     0       1       2       3       4
 # bins=4     0       1       2       3
 # bins=20  01  23  45  67  89  01   23 45  67  89
-oldbins = arange(len(y))
-newbins = arange(5)
-expected = array([0, 3, 3, 1, 0])
+oldbins = np.arange(len(y))
+newbins = np.arange(5)
+expected = np.array([0, 3, 3, 1, 0])
 
 
 
 def f(y, bins):
-    yi = zeros( (bins,))
+    yi = np.eros( (bins,))
     spacing = len(y) / bins
     if spacing > 0:
         for i in range(bins):
@@ -47,25 +47,24 @@ def f(y, bins):
             c += 1
             #print i * padding + j, '0 -> 0'
 
-    return array(yi)
+    return np.array(yi)
 
 def p(x):
     return str(int(x))
 
 yi = f(y, 5)
-assert all(yi == array([0, 3, 3, 1, 0]))
-print
+assert all(yi == np.array([0, 3, 3, 1, 0]))
+
 yi = f(y, 4)
-assert all(yi == array([0, 3, 3, 1]))
+assert all(yi == np.array([0, 3, 3, 1]))
 
 # how to handle "expansions"?
 
-print
 yi = f(y, 20)
-print ' '.join(map(p,yi))
-assert all(yi == array([0,0,0,0,1,0,2,0,2,0,1,0,1,0,0,0,0,0,0,0]))
+print (' '.join(map(p,yi)))
+assert all(yi == np.array([0,0,0,0,1,0,2,0,2,0,1,0,1,0,0,0,0,0,0,0]))
 
-print
+
 yi = f(y, 22)
-print ' '.join(map(p,yi))
-assert all(yi == array([0,0,0,0,1,0,2,0,2,0,1,0,1,0,0,0,0,0,0,0,0,0]))
+print (' '.join(map(p,yi)))
+assert all(yi == np.array([0,0,0,0,1,0,2,0,2,0,1,0,1,0,0,0,0,0,0,0,0,0]))

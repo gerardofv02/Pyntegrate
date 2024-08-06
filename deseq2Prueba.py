@@ -18,19 +18,19 @@ def tss_generator():
 
 path = os.path.dirname(os.path.abspath(__file__))
 print(path)
+bins = 100
+# features, arrays ,tsses , tsses_1kb = Pyntegrate.chipSeqSignalAnalysis.generate_arrays_features_from_tsses_from_db(os.path.join(path, 'data/gencode.vM25.annotation.gtf.db'), os.path.join(path, 'BamFiles/SRR1204544_sort_nondup.bw'),'bigwig',os.path.join(path, 'BamFiles/SRR1204546_sort_nondup.bw'),'bigwig',genome = "mm10", bins=bins)
 
-features, arrays ,tsses , tsses_1kb = Pyntegrate.chipSeqSignalAnalysis.generate_arrays_features_from_tsses_from_db(os.path.join(path, 'data/gencode.vM25.annotation.gtf.db'), os.path.join(path, 'BamFiles/SRR1204544_sort_nondup.bw'),'bigwig',os.path.join(path, 'BamFiles/SRR1204546_sort_nondup.bw'),'bigwig',genome = "mm10")
-
-print("\nArrays: ",len(arrays['ip']), len(arrays['input']))
+# print("\nArrays: ",len(arrays['ip']), len(arrays['input']))
 # # # db = gffutils.create_db(data=path+"/Homo_sapiens.GRCh38.109.gtf",dbfn=path+"/data/Homo_sapiens.GRCh38.109.gtf.db")
 # # db = gffutils.create_db(data=path+"/prueba.gtf",dbfn=path+"/data/prueba.gtf.db")
 
-# db = gffutils.FeatureDB(os.path.join(path, 'data/gencode.vM25.annotation.gtf.db'))
-# print(db)
+db = gffutils.FeatureDB(os.path.join(path, 'data/gencode.vM25.annotation.gtf.db'))
+print(db)
 
-# # fn = "gencode.vM25.annotation.gtf"
+# fn = "gencode.vM25.annotation.gtf"
 
-# # db = open(fn).read()
+# db = open(fn).read()
 
 
 
@@ -42,9 +42,22 @@ print("\nArrays: ",len(arrays['ip']), len(arrays['input']))
 
 # tsses_1kb = tsses.slop(b=1000, genome='mm10', output='tsses-1kb.gtf')
 
+# atac = Pyntegrate.genomic_signal(
+#     os.path.join(path,'test_3_DNase-seq.bw'),
+#     'bigwig'
+# )
 
+# processes = multiprocessing.cpu_count()
+# atac_signal = atac.array(
+#     tsses_1kb,
+#     bins=100,
+#     processes=processes
+# )
 
+# normalized_subtracted = Pyntegrate.chipSeqSignalAnalysis.value_array_simple(atac_signal)
 
+# data = Pyntegrate.results_table.ResultsTable('test_3_RNA-seq.csv')
+# print(data, normalized_subtracted)
 
 
 # ip_signal = Pyntegrate.genomic_signal(
@@ -68,19 +81,18 @@ print("\nArrays: ",len(arrays['ip']), len(arrays['input']))
 #         tsses_1kb,
 
 #         # Bin signal into this many bins per window
-#         bins=100,
+#         bins=1,
 
 #         # Use multiple CPUs. Dramatically speeds up run time.
 #         processes=processes)
 
-#     print(ip_array[0][:10])
+
 #     # Do the same thing for input.
 #     input_array = input_signal.array(
 #         tsses_1kb,
-#         bins=100,
+#         bins=10,
 #         processes=processes)
 
-#     print(input_array[:10])
 
 
 
@@ -111,7 +123,7 @@ print("\nArrays: ",len(arrays['ip']), len(arrays['input']))
 
 #Haciendo gráfica de ip e input distancia del tss
 ##################################################################
-x = np.linspace(-1000, 1000, 100)
+x = np.linspace(-1000, 1000, bins)
 
 
 # # Create a figure and axes
@@ -169,25 +181,25 @@ mis_array_ip ,mis_array_input = Pyntegrate.chipSeqSignalAnalysis.values_array(ar
 # ################################
 # # normalized_subtracted = arrays["ip"] - arrays["input"]
 normalized_subtracted= Pyntegrate.chipSeqSignalAnalysis.calculate_peaks(arrays_ip=mis_array_ip,arrays_input= mis_array_input)
-normalized_subtracted_de_cero = Pyntegrate.chipSeqSignalAnalysis.calculate_peaks_with_gene_name(arrays['ip'],arrays['input'])
-################################
-# print("Type of normaliz subtracted before all", type(normalized_subtracted), normalized_subtracted)
-# Tweak some font settings so the results look nicer
-# plt.rcParams['font.family'] = 'Arial'
-plt.rcParams['font.size'] = 10
+# normalized_subtracted_de_cero = Pyntegrate.chipSeqSignalAnalysis.calculate_peaks_with_gene_name(arrays['ip'],arrays['input'])
+# ################################
+# # print("Type of normaliz subtracted before all", type(normalized_subtracted), normalized_subtracted)
+# # Tweak some font settings so the results look nicer
+# # plt.rcParams['font.family'] = 'Arial'
+# plt.rcParams['font.size'] = 10
 
-data = Pyntegrate.results_table.DEseq2ResultsPrueba("./desq2_Sanchez.csv",  import_kwargs=dict(index_col=1))
-print("\ndata: ",data,"len data: ", len(data) )
-data.reindex_to(tsses, attribute='gene_name')
-data.data['gene_name'] = data.index
-# data2 = data.data
-data.delete_genes_no_peaks_chip(normalized_subtracted_de_cero)
-print("\ndata: ",data,"len data: ", len(data) )
+# data = Pyntegrate.results_table.DEseq2ResultsPrueba("./desq2_Sanchez.csv",  import_kwargs=dict(index_col=1))
+# print("\ndata: ",data,"len data: ", len(data) )
+# data.reindex_to(tsses, attribute='gene_name')
+# data.data['gene_name'] = data.index
+# # data2 = data.data
+# data.delete_genes_no_peaks_chip(normalized_subtracted_de_cero)
+# print("\ndata: ",data,"len data: ", len(data) )
 
-fig = data.volcano_plot(column_name_padj="padj", log2FoldChange_upper = 1.5,log2FoldChange_lower=-1.5,nlog10_upper=2,text_nlog10=40,text_log2FoldChange=6 )
-##Por defecto sin nombres pero poner opciones para usarlos 
+# fig = data.volcano_plot(column_name_padj="padj", log2FoldChange_upper = 1.5,log2FoldChange_lower=-1.5,nlog10_upper=2,text_nlog10=40,text_log2FoldChange=6 )
+# ##Por defecto sin nombres pero poner opciones para usarlos 
 
-fig.show()
+# fig.show()
 
 
 
@@ -195,73 +207,75 @@ fig.show()
 
 # # the metaseq.plotutils.imshow function does a lot of work,
 # # we just have to give it the right arguments:
-# # fig = Pyntegrate.plotutils.imshow(
+fig = Pyntegrate.plotutils.imshow(
 
-# #     The array to plot; here, we've subtracted input from IP.
-# #     normalized_subtracted,
+    # The array to plot; here, we've subtracted input from IP.
+    normalized_subtracted,
 
-# #     X-axis to use
-# #     x=x,
+    # X-axis to use
+    x=x,
 
-# #     Change the default figure size to something smaller for this example
-# #     figsize=(3, 7),
+    # Change the default figure size to something smaller for this example
+    figsize=(3, 7),
 
-# #     Make the colorbar limits go from 5th to 99th percentile.
-# #     `percentile=True` means treat vmin/vmax as percentiles rather than
-# #     actual values.
-# #     percentile=True,
-# #     vmin=5,
-# #     vmax=99,
+    # Make the colorbar limits go from 5th to 99th percentile.
+    # `percentile=True` means treat vmin/vmax as percentiles rather than
+    # actual values.
+    percentile=True,
+    vmin=5,
+    vmax=99,
 
-# #     Style for the average line plot (black line)
-# #     line_kwargs=dict(color='k', label='All'),
+    # Style for the average line plot (black line)
+    line_kwargs=dict(color='k', label='All'),
 
-# #     Style for the +/- 95% CI band surrounding the
-# #     average line (transparent black)
-# #     fill_kwargs=dict(color='k', alpha=0.3),
-# # )
-
-
-
-# # fig = Pyntegrate.plotutils.imshow(
-
-# #     These are the same arguments as above.
-# #     normalized_subtracted,
-# #     x=x,
-# #     figsize=(3, 7),
-# #     vmin=5, vmax=99,  percentile=True,
-# #     line_kwargs=dict(color='k', label='All'),
-# #     fill_kwargs=dict(color='k', alpha=0.3),
-
-# #     This is new: sort by mean signal
-# #     sort_by=normalized_subtracted.mean(axis=1)
-# # )
-
-# # fig = Pyntegrate.plotutils.imshow(
-
-# #     These are the same arguments as above.
-# #     normalized_subtracted,
-# #     x=x,
-# #     figsize=(3, 7),
-# #     vmin=5, vmax=99,  percentile=True,
-# #     line_kwargs=dict(color='k', label='All'),
-# #     fill_kwargs=dict(color='k', alpha=0.3),
-
-# #     This is new: sort by mean signal
-# #     sort_by=np.argmax(normalized_subtracted, axis=1)
-# # )
+    # Style for the +/- 95% CI band surrounding the
+    # average line (transparent black)
+    fill_kwargs=dict(color='k', alpha=0.3),
+)
 
 
 
-# # fig = Pyntegrate.plotutils.imshow(
-# #     normalized_subtracted,
-# #     x=x,
-# #     figsize=(3, 7),
-# #     vmin=5, vmax=99,  percentile=True,
-# #     line_kwargs=dict(color='k', label='All'),
-# #     fill_kwargs=dict(color='k', alpha=0.3),
-# #     sort_by=normalized_subtracted.mean(axis=1)
-# # )
+fig = Pyntegrate.plotutils.imshow(
+
+    # These are the same arguments as above.
+    normalized_subtracted,
+    x=x,
+    figsize=(3, 7),
+    vmin=5, vmax=99,  percentile=True,
+    line_kwargs=dict(color='k', label='All'),
+    fill_kwargs=dict(color='k', alpha=0.3),
+
+    # This is new: sort by mean signal
+    sort_by=normalized_subtracted.mean(axis=1)
+)
+
+fig = Pyntegrate.plotutils.imshow(
+
+    # These are the same arguments as above.
+    normalized_subtracted,
+    x=x,
+    figsize=(3, 7),
+    vmin=5, vmax=99,  percentile=True,
+    line_kwargs=dict(color='k', label='All'),
+    fill_kwargs=dict(color='k', alpha=0.3),
+
+    # This is new: sort by mean signal
+    sort_by=np.argmax(normalized_subtracted, axis=1)
+)
+
+
+
+fig = Pyntegrate.plotutils.imshow(
+    normalized_subtracted,
+    x=x,
+    figsize=(3, 7),
+    vmin=5, vmax=99,  percentile=True,
+    line_kwargs=dict(color='k', label='All'),
+    fill_kwargs=dict(color='k', alpha=0.3),
+    sort_by=normalized_subtracted.mean(axis=1)
+)
+
+plt.show()
 
 
 # # "line_axes" is our handle for working on the lower axes.

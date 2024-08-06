@@ -176,7 +176,7 @@ class BigWigSignal(BaseSignal):
 
     def mapped_read_count(self, force=False):
         """
-        Counts total reads in a BAm file.
+        Counts total reads in a BigWig file.
 
         If a file self.bam + '.scale' exists, then just read the first line of
         that file that doesn't start with a "#".  If such a file doesn't exist,
@@ -192,58 +192,26 @@ class BigWigSignal(BaseSignal):
             If True, then force a re-count; otherwise use cached data if
             available.
         """
-        # Already run?
+
         if self._readcount and not force:
             return self._readcount
 
         if os.path.exists(self.fn + '.mmr') and not force:
             for line in open(self.fn + '.mmr'):
-                #print(line)
                 if line.startswith('#'):
                     continue
                 self._readcount = float(line.strip())
                 return self._readcount
 
-        # cmds = ['samtools',
-        #         'view',
-        #         '-c',
-        #         '-F', '0x4',
-        #         self.fn]
-        # p = subprocess.Popen(
-        #     cmds, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        # stdout, stderr = p.communicate()
-        # if stderr:
-        #     sys.stderr.write('samtools says: %s' % stderr)
-        #     return None
-        # mapped_reads = int(stdout)
-
         mapped_reads = 0
-        #print("Voy por aqui")
         try:
             bwFile = pyBigWig.open(self.fn)
-            #print(bwFile.header())
         except:
-            #print("Error opening bigwig file")
             return self._readcount
-        #print("Voy por alli")
         for chr in bwFile.chroms():
-            print(chr,type(chr))
-            ##print("\n\n\n\n\n\n\n",bwFile.chroms(chr))
             values = bwFile.values(chr,0,bwFile.chroms(chr))
             if values:
-                #print("por ahora voy aqui")
                 mapped_reads += sum(1 for v in values if v!= 0)
-                #print(mapped_reads)
-        # bw = pyBigWig.open(self.fn)
-        # mapped_reads = 0
-        # for chrom in bw.chroms():
-        #     stats = bw.stats(chrom, type='sum')
-        #     if stats and len(stats) > 0:
-        #         mapped_reads += stats[0]  # Add the first value if stats is not empty
-        # bw.close()
-        #print("Voy por alla")
-        # write to file so the next time you need the lib size you can access
-        # it quickly
         if not os.path.exists(self.fn + '.mmr'):
             fout = open(self.fn + '.mmr', 'w')
             fout.write(str(mapped_reads) + '\n')

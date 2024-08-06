@@ -2,7 +2,7 @@ import pandas as pd
 import Pyntegrate
 import matplotlib.pyplot as plt
 
-df = pd.read_csv("misPeaks.txt",delimiter="\t")
+df = pd.read_csv("SRR1204546_sort_nondup.bw.bed.txt",delimiter="\t")
 
 fig = Pyntegrate.plotutils.annotate_peaks(df)
 

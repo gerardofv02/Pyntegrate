@@ -242,6 +242,15 @@ class IntervalSignal(BaseSignal):
             arrays = _count_array(self.fn, self.__class__, features, **kwargs)
         return np.concatenate(arrays)
 
+class NarrowPeakSignal(IntervalSignal):
+   def __init__(self, fn):
+        """
+        Class for operating on NarrowPeak files.
+        """
+        BaseSignal.__init__(self, fn)
+        self._readcount = None
+        self.adapter = NarrowPeakAdapter(self.fn)
+
 
 class BamSignal(IntervalSignal):
     def __init__(self, fn):
@@ -418,4 +427,5 @@ _registry = {
     'vcf': BedSignal,
     'bigwig': BigWigSignal,
     'bigbed': BigBedSignal,
+    'narrowPeak': NarrowPeakSignal,
 }
