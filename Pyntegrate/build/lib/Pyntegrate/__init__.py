@@ -12,4 +12,4 @@ from .results_table import *
 from .tableprinter import *
 from .version import __version__
 from .persistence import *
-from .chipSeqSignalAnalysis import *
+from .SeqSignalAnalysis import *

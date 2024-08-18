@@ -427,5 +427,5 @@ _registry = {
     'vcf': BedSignal,
     'bigwig': BigWigSignal,
     'bigbed': BigBedSignal,
-    'narrowPeak': NarrowPeakSignal,
+    # 'narrowpeak': NarrowPeakSignal,
 }

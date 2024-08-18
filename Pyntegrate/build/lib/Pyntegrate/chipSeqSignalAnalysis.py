@@ -1,6 +1,7 @@
 from ._genomic_signal import *
 from .persistence import *
 from .array_helpers import *
+from .plotutils import *
 import os
 import gffutils
 import pybedtools
@@ -146,7 +147,7 @@ def calculate_peaks(arrays_ip, arrays_input):
     return peaks
 
 
-def distance_from_tss_chipSeq(arrays_ip, arrays_input, name=""):
+def distance_from_tss_chipSeq(arrays_ip, arrays_input,xAxes, name=""):
 
     """
     Function to show in a graphic the distance of IP signal data and INPUT signal data from the TSS.
@@ -155,7 +156,7 @@ def distance_from_tss_chipSeq(arrays_ip, arrays_input, name=""):
         - arrays_input: Array: The array of the INPUT signal data
     """
 
-    x = np.linspace(-1000, 1000, 100)
+    x = xAxes
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.plot(
@@ -193,8 +194,8 @@ def homer_peaks(tag_directory,style="factor",output="auto"):
 
 def homer_annotate_peaks(file_directory,gene, output):
 
-    with open(output, "w") as out_file, open("logs.log", "w") as err_file:
-        subprocess.run(["annotatePeaks.pl", file_directory, gene], stdout=out_file, stderr=err_file)
+    with open(output, "w") as out_file, open("logs.log", "w") as logs_file:
+        subprocess.run(["annotatePeaks.pl", file_directory, gene], stdout=out_file, stderr=logs_file)
 
 
 
@@ -460,7 +461,7 @@ def bigwigToBed(bwFile, bedNameFile):
 
 #         plt.show()
 
-def array_gene_name_and_annotation(normalized_subtracted,bins):
+def array_gene_name_and_annotation(normalized_subtracted,xAxes):
     bed_data = []
     i = 0
     for e in normalized_subtracted:
@@ -469,12 +470,15 @@ def array_gene_name_and_annotation(normalized_subtracted,bins):
     
     df_bed = pd.DataFrame(bed_data, columns=['chr', 'start', 'end', 'ID'])
     df_bed.to_csv("normalized_subtracted.bed",sep='\t', header=True, index=False)
+
     homer_annotate_peaks(file_directory="normalized_subtracted.bed",gene="mm10", output="normalized_subtracted.bed.txt")
     df_homer = pd.read_csv("normalized_subtracted.bed.txt",delimiter="\t")
+
     print(df_homer)
     df_homer["Annotation"] = df_homer["Annotation"].str.replace(r'\(.*', '', regex=True)
     print(df_homer)
     unique_values_homer = df_homer["Annotation"].unique()
+
     array_gene_annotation = []
     for idx, row in df_homer.iterrows():
         array_gene_annotation.append({"gene_name": row['Gene Name'], "annotation": row['Annotation']})
@@ -486,7 +490,9 @@ def array_gene_name_and_annotation(normalized_subtracted,bins):
             if x['gene_name'] == y['gene_name']:
                 df_homer_total[y['annotation']].append(x['values'])
                 break
-    x = np.linspace(-1000, 1000, bins)
+    x = xAxes
+
+    
     for key in df_homer_total:
 
         if len(df_homer_total[key]) == 0:
@@ -505,7 +511,6 @@ def array_gene_name_and_annotation(normalized_subtracted,bins):
             line_kwargs=dict(color='k', label='All'),
             fill_kwargs=dict(color='k', alpha=0.3),
             )
-
 
 
             fig = imshow(
@@ -555,5 +560,84 @@ def array_gene_name_and_annotation(normalized_subtracted,bins):
 
 
 
+def chip_dnase(chip_array, dnase_array,xAxes,name="", xlabel="", ylabel=""):
+
+    """
+    Function to show in a graphic the distance of IP signal data and INPUT signal data from the TSS.
+    Params:
+        - arrays_ip: Array: The array of the IP signal data
+        - arrays_input: Array: The array of the INPUT signal data
+    """
+
+    x = xAxes
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
+    # Eje principal para DNase-seq
+    line1, = ax.plot(
+        x,
+        dnase_array.mean(axis=0),
+        color='k',
+        label='DNase-seq'
+    )
+    ax.set_xlabel('Distance from the TSS')
+    ax.set_ylabel('DNase-seq signal intensity')
+    ax.axvline(0, linestyle=':', color='k')
+    ax.set_title(name)  # Asegúrate de que 'name' esté definido
+
+    # Eje secundario para ChIP-seq
+    ax2 = ax.twinx()
+    line2, = ax2.plot(
+        x,
+        chip_array.mean(axis=0),
+        color='r',
+        label='ChIP-seq'
+    )
+    ax2.set_ylabel('ChIP-seq Signal', color='r')
+    ax2.tick_params(axis='y', labelcolor='r')
+
+    # Añadir leyendas para ambos ejes en un solo lugar
+    lines = [line1, line2]
+    labels = [line.get_label() for line in lines]
+    legend = ax.legend(lines, labels, loc='best', title='Legend')
+
+    return fig
 
 
+def heatmap_no_sorted(signal_values, xAxis):
+    fig = imshow(
+    signal_values,
+    x=xAxis,
+    figsize=(3, 7),
+    percentile=True,
+    vmin=5,
+    vmax=99,
+    line_kwargs=dict(color='k', label='All'),
+    fill_kwargs=dict(color='k', alpha=0.3),
+    )
+    return fig
+
+def heatmap_sorted_by_meanValues(signal_values, xAxis):
+    fig = imshow(
+    signal_values,
+    x=xAxis,
+    figsize=(3, 7),
+    vmin=5, vmax=99,  percentile=True,
+    line_kwargs=dict(color='k', label='All'),
+    fill_kwargs=dict(color='k', alpha=0.3),
+    sort_by=signal_values.mean(axis=1)
+    )
+    return fig
+
+def heatmap_sorted_by_maxValueIndex(signal_values, xAxis):
+    fig = imshow(
+    signal_values,
+    x=xAxis,
+    figsize=(3, 7),
+    vmin=5, vmax=99,  percentile=True,
+    line_kwargs=dict(color='k', label='All'),
+    fill_kwargs=dict(color='k', alpha=0.3),
+    sort_by=signal_values.mean(axis=1)
+    )
+    return fig

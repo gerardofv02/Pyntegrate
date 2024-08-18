@@ -56,7 +56,7 @@ def imshow(arr, x=None, ax=None, vmin=None, vmax=None, percentile=True,
            line_kwargs=None, fill_kwargs=None, imshow_kwargs=None, figsize=(5, 12),
            width_ratios=(4, 1), height_ratios=(4, 1),
            subplot_params=dict(wspace=0.1, hspace=0.1),
-           subset_by=None, subset_order=None,):
+           subset_by=None, subset_order=None):
     """
     Do-it-all function to help with plotting heatmaps
 

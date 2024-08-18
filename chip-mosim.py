@@ -28,7 +28,7 @@ bins = 100
 
 db = gffutils.FeatureDB(os.path.join(path, 'data/gencode.vM25.annotation.gtf.db'))
 print(db)
-chip = Pyntegrate.genomic_signal('test_3_ChIP-seq_3.bw', 'bigwig')
+chip = Pyntegrate.genomic_signal('mosimData/test_3_ChIP-seq_3.bw', 'bigwig')
 tsses = pybedtools.BedTool(tss_generator()).saveas('tsses.gtf')
 
 
@@ -46,8 +46,6 @@ chip_signal =  chip.array(
 print(chip_signal)
 chip_signal_good = []
 
-for x in chip_signal:
-    chip_signal_good.append(x[0])
 
 chip_signal_good = np.array(chip_signal_good)
 normalized_subtracted_semi = Pyntegrate.chipSeqSignalAnalysis.value_array_simple(chip_signal)
@@ -58,9 +56,11 @@ normalized_subtracted_semi /= chip.mapped_read_count() / 1e6
 
 filtered_arrays = [arr for arr in normalized_subtracted_semi if np.mean(arr) != 0]
 
-normalized_subtracted_complete = np.array(normalized_subtracted_semi)
+normalized_subtracted_complete = np.array(filtered_arrays)
 print(normalized_subtracted_semi)
 x = np.linspace(-1000, 1000, bins)
+
+fig = Pyntegrate.chipSeqSignalAnalysis.chip_dnase(normalized_subtracted_complete, normalized_subtracted_complete,bins)
 
 
 fig = Pyntegrate.plotutils.imshow(
@@ -91,19 +91,19 @@ fig = Pyntegrate.plotutils.imshow(
 
 
 
-# fig = Pyntegrate.plotutils.imshow(
+fig = Pyntegrate.plotutils.imshow(
 
-#     # These are the same arguments as above.
-#     normalized_subtracted_complete,
-#     x=x,
-#     figsize=(3, 7),
-#     vmin=5, vmax=99,  percentile=True,
-#     line_kwargs=dict(color='k', label='All'),
-#     fill_kwargs=dict(color='k', alpha=0.3),
+    # These are the same arguments as above.
+    normalized_subtracted_complete,
+    x=x,
+    figsize=(3, 7),
+    vmin=5, vmax=99,  percentile=True,
+    line_kwargs=dict(color='k', label='All'),
+    fill_kwargs=dict(color='k', alpha=0.3),
 
-#     # This is new: sort by mean signal
-#     sort_by=normalized_subtracted_complete.mean(axis=1)
-# )
+    # This is new: sort by mean signal
+    sort_by=normalized_subtracted_complete.mean(axis=1)
+)
 
 # fig = Pyntegrate.plotutils.imshow(
 

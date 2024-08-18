@@ -217,7 +217,9 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
     """
     # bigWig files are handled differently, so we need to know if we're working
     # with one; raise exeception if a kwarg was supplied that's not supported.
-    if isinstance(reader, BigWigAdapter):
+    # if isinstance(reader, BigWigAdapter) or isinstance(reader, NarrowPeakAdapter):
+    is_narrow = False   
+    if isinstance(reader, BigWigAdapter) :
         #print("Si que es bigwig y reader: ", reader)
         is_bigwig = True
         defaults = (
@@ -248,7 +250,8 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
         if use_score:
             raise ArgumentError("Argument 'use_score' not supported for "
                                 "bam")
-
+    if isinstance(reader,NarrowPeakAdapter ):
+        is_narrow = True
     # e.g., features = "chr1:1-1000"
     if isinstance(features, str):
         features = tointerval(features)
@@ -290,7 +293,7 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
 
         # #print("Window: " , window, "\n chrom: " , chrom, "\n start: ", start, "\n stop:" , stop, "\n strand: ", strand)
 
-        if not is_bigwig:
+        if not is_bigwig and not is_narrow:
             # Extend the window to catch reads that would extend into the
             # requested window
             _fs = fragment_size or 0
@@ -303,9 +306,11 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
 
             # start off with an array of zeros to represent the window
             profile = np.zeros(window_size, dtype=float)
-
+            # print("\n REader paddedwindow",reader[padded_window])
+            for query_interval in reader[padded_window]:
+                print(query_interval)
             for interval in reader[padded_window]:
-
+                print("Interval: ", interval)
                 if read_strand:
                     if interval.strand != read_strand:
                         continue
@@ -338,6 +343,8 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
                 stop_ind = interval.stop - start
                 stop_ind = min(stop_ind, window_size)
 
+                print("\nStart: ", start_ind, "\nEnd: ", stop_ind,"\n Score: ", interval.score)
+
                 # Skip if the feature is shifted outside the window. This can
                 # happen with large values of `shift_width`.
                 if start_ind >= window_size or stop_ind < 0:
@@ -358,7 +365,81 @@ def _local_coverage(reader, features, read_strand=None, fragment_size=None,
 
                 else:
                     profile[start_ind:stop_ind] = score
+            # print("\n FInal profile: ", profile)
+        elif is_narrow:
+                        # Extend the window to catch reads that would extend into the
+            # requested window
+            _fs = fragment_size or 0
+            padded_window = pybedtools.Interval(
+                chrom,
+                max(start - _fs - shift_width, 0),
+                stop + _fs + shift_width,
+            )
+            print(padded_window)
+            window_size = stop - start
 
+            # start off with an array of zeros to represent the window
+            profile = np.zeros(window_size, dtype=float)
+            # print("\n REader paddedwindow",reader[padded_window])
+            for query_interval in reader[padded_window]:
+                print(query_interval)
+            for interval in reader[padded_window]:
+                print("Interval: ", interval)
+                if read_strand:
+                    if interval.strand != read_strand:
+                        continue
+
+                # Shift interval by modeled distance, if specified.
+                if shift_width:
+                    if interval.strand == '-':
+                        interval.start -= shift_width
+                        interval.stop -= shift_width
+                    else:
+                        interval.start += shift_width
+                        interval.stop += shift_width
+
+                # Extend fragment size from 3'
+                if fragment_size:
+                    if interval.strand == '-':
+                        interval.start = interval.stop - fragment_size
+                    else:
+                        interval.stop = interval.start + fragment_size
+
+                # Convert to 0-based coords that can be used as indices into
+                # array
+                start_ind = interval.start - start
+
+                # If the feature goes out of the window, then only include the
+                # part that's inside the window
+                start_ind = max(start_ind, 0)
+
+                # Same thing for stop
+                stop_ind = interval.stop - start
+                stop_ind = min(stop_ind, window_size)
+
+                print("\nStart: ", start_ind, "\nEnd: ", stop_ind,"\n Score: ", interval.score)
+
+                # Skip if the feature is shifted outside the window. This can
+                # happen with large values of `shift_width`.
+                if start_ind >= window_size or stop_ind < 0:
+                    continue
+
+                # Finally, increment profile
+                if use_score:
+                    score = float(interval.score)
+                else:
+                    score = 1
+
+                if accumulate:
+                    if preserve_total:
+                        profile[start_ind:stop_ind] += (
+                            score / float((stop_ind - start_ind)))
+                    else:
+                        profile[start_ind:stop_ind] += score
+
+                else:
+                    profile[start_ind:stop_ind] = score
+            # print("\n FInal profile: ", profile)
         else:  # it's a bigWig
             ##Aqui es donde cambia todo (fileadapters)
             #print("\nNBIN: ",nbin, "WINDOWlen: ", len(window),"\nWINODW: ", window, "\nWINDOW TYPE", type(window),"\nREADER: ", reader)
@@ -465,6 +546,7 @@ def _array_parallel(fn, cls, genelist, chunksize=250, processes=1, **kwargs):
     # print("MIs results:", results)
     pool.close()
     pool.join()
+    
     return results
 
 def _count_array_parallel(fn, cls, genelist, chunksize=250, processes=1, **kwargs):

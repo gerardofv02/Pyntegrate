@@ -3,11 +3,11 @@ MANIFEST.in
 README.rst
 requirements.txt
 setup.py
+Pyntegrate/SeqSignalAnalysis.py
 Pyntegrate/__init__.py
 Pyntegrate/_genomic_signal.py
 Pyntegrate/array_helpers.py
 Pyntegrate/arrayify.py
-Pyntegrate/chipSeqSignalAnalysis.py
 Pyntegrate/colormap_adjust.py
 Pyntegrate/filetype_adapters.py
 Pyntegrate/helpers.py

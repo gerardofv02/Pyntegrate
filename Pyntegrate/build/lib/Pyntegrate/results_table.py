@@ -45,10 +45,10 @@ class ResultsTable(object):
         """
         Wrapper around a pandas.DataFrame that adds additional functionality.
         """)
-    def __init__(self, data, db=None, import_kwargs=None):
+    def __init__(self, data, delimiter="\t", db=None, import_kwargs=None):
         if isinstance(data, str):
             import_kwargs = import_kwargs or {}
-            data = pandas.read_table(data, **import_kwargs)
+            data = pandas.read_table(data,delimiter=delimiter,**import_kwargs)
         if not isinstance(data, pandas.DataFrame):
             raise ValueError("`data` is not a pandas.DataFrame")
         self.data = data
@@ -1085,7 +1085,7 @@ class DESeqResults(DifferentialExpressionResults):
 #     lfc_column = 'log2FoldChange'
 #     mean_column = 'baseMean'
 
-class DEseq2ResultsPrueba(DifferentialExpressionResults):
+class DEseq2Results(DifferentialExpressionResults):
     __doc__ = _base_doc % dedent(
         """
         Class for working with results from DESeq2.
@@ -1274,7 +1274,7 @@ class DEseq2ResultsPrueba(DifferentialExpressionResults):
 
 
 class LazyDict(object):
-    def __init__(self, fn_dict, dbfn, index_file, extra=None, cls=DEseq2ResultsPrueba,
+    def __init__(self, fn_dict, dbfn, index_file, extra=None, cls=DEseq2Results,
                  modifier=None):
         """
         Dictionary-like object that lazily-loads ResultsTable objects.
