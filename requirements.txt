@@ -13,3 +13,4 @@ pybedtools==0.9.1
 fisher==0.1.14
 adjustText==1.1.1
 pyBigWig==0.3.22
+seaborn==0.13.2
