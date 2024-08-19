@@ -279,73 +279,6 @@ def homer_annotate_peaks(file_directory,gene, output):
 
 
 
-# def chip_genes_not_used_with_rna(tsses, data, normalized_subtracted, id="gene_name", findBy="gene_name"):
-
-#     """
-#     Function to delete the genes not used in both data (chip and rna). Need to use this function to analyse both them together because
-#     having more genes can have problems with array length. Important to be in the same order normalized_subtracted and tsses because
-#     index are used
-
-#     Params:
-#         -tsses: Pybedtool class with the transcriptions
-#         -data: DEseq2ResultsPrueba class where there is rna-seq data
-#         -normalized_subtracted: Array where have the chip-seq peaks calculated
-#         -id: String that indicates the condition filter (gene_name, gene_id,...)
-#     """
-#     df2 = tsses.to_dataframe()
-#     print(df2)
-#     gene_used = []
-#     gene_not_used_chip = []
-#     indexs = []
-#     values_not_data = []
-#     miidx = -1
-#     for idx,value in enumerate(df2.values):
-#         ##Hacer dinámico
-#         # if miidx != -1:
-#         #     continue
-#         # else:
-#         #     for idx, x in enumerate(value[8].split(";")):
-#         #         if findBy in x:
-#         #             miidx = idx 
-#         #             break
-
-#         # if value[8].split(";")[miidx].split(" ")[1].split('"')[0] in data[id]:
-#         #     indexs.append(idx)
-#         #     gene_used.append(value[8].split(";")[miidx].split(" ")[1].split('"')[0])
-#         # else:
-#         #     gene_not_used_chip.append(value[8].split(";")[miidx].split(" ")[1].split('"')[0])
-            
-#         if value[8].split(";")[3].split(" ")[2].split('"')[1] in data[id]:
-#             indexs.append(idx)
-#             gene_used.append(value[8].split(";")[3].split(" ")[2].split('"')[1])
-#         else:
-#             gene_not_used_chip.append(value[8].split(";")[3].split(" ")[2].split('"')[1])
-
-
-#     with open("genes_not_used_chip_seq.log", "w") as chip_log:
-#         for gene in gene_not_used_chip:
-#             chip_log.write(f"{gene}\n")
-
-#     for value_data in data.index:
-#         if value_data not in gene_used:
-#             values_not_data.append(value_data)
-
-#     with open("genes_not_used_rna_seq.log", "w") as rna_log:
-#         for gene in values_not_data:
-#             rna_log.write(f"{gene}\n")
-
-#     print("\nGenes_not_used_rna-seq: ",values_not_data)
-#     normalized_subtracted_good= []
-#     for i in range(len(normalized_subtracted)):
-#         if i in indexs:
-#             normalized_subtracted_good.append(normalized_subtracted[i])
-#     data = data.drop(values_not_data)
-
-#     normalized_subtracted= np.array(normalized_subtracted_good)
-#     print("Normalized subtract len: ", len(normalized_subtracted))
-
-#     return normalized_subtracted,data
-
 def chip_genes_not_used_with_atac(atac_signal,chip_signal, by):
 
     """
@@ -435,50 +368,6 @@ def chip_or_atac_genes_not_used_with_rna( data, signal, id="gene_name", rna_colu
 
     return signal_good,data
 
-
-    # gene_used = []
-    # gene_not_used_chip = []
-    # values_not_data = []
-    # indexs = []
-    # print(normalized_subtracted)
-    # for idx, x in enumerate(normalized_subtracted):
-    #     # print(x[id], data[id])
-    #     ##No se si esta comprobación se debería de hacer
-        
-    #     if("." in x[id]):
-    #         print(x[id])
-    #         r = x[id].split(".")[0]
-    #     if r in data[id]:
-    #         gene_used.append(r)
-    #         indexs.append(idx)
-    #     else:
-    #         gene_not_used_chip.append(r)
-
-        # print(len(normalized_subtracted))
-
-    # with open("genes_not_used_chip_seq.log", "w") as chip_log:
-    #     for gene in gene_not_used_chip:
-    #         chip_log.write(f"{gene}\n")
-
-    # for value_data in data[id]:
-    #     if value_data not in gene_used:
-    #         values_not_data.append(value_data)
-
-    # with open("genes_not_used_rna_seq.log", "w") as rna_log:
-    #     for gene in values_not_data:
-    #         rna_log.write(f"{gene}\n")
-
-    # # print("\nGenes_not_used_rna-seq: ",values_not_data)
-    # normalized_subtracted_good= []
-    # for i in range(len(normalized_subtracted)):
-    #     if i in indexs:
-    #         normalized_subtracted_good.append(normalized_subtracted[i])
-    # data = data.drop(values_not_data)
-
-    # normalized_subtracted= np.array(normalized_subtracted_good)
-    # print("Normalized subtract len: ", len(normalized_subtracted))
-
-    # return signal_good,data
 
 
 def bigwigToBed(bwFile, bedNameFile):
@@ -573,20 +462,19 @@ def array_gene_name_and_annotation(normalized_subtracted,xAxes):
 
 
 
-def chip_dnase(chip_array, dnase_array,xAxes,name="", xlabel="", ylabel=""):
+def chip_dnase(chip_array, dnase_array,xAxes,name=""):
 
     """
     Function to show in a graphic the distance of IP signal data and INPUT signal data from the TSS.
     Params:
-        - arrays_ip: Array: The array of the IP signal data
-        - arrays_input: Array: The array of the INPUT signal data
+        - chip_array: Array: The array with the chip-seq signal values
+        - dnase_array: Array: The array with the dnase-seq signal values
+        - xAxes:
     """
-
     x = xAxes
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
-
     # Eje principal para DNase-seq
     line1, = ax.plot(
         x,
@@ -598,7 +486,6 @@ def chip_dnase(chip_array, dnase_array,xAxes,name="", xlabel="", ylabel=""):
     ax.set_ylabel('DNase-seq signal intensity')
     ax.axvline(0, linestyle=':', color='k')
     ax.set_title(name) 
-
     # Eje secundario para ChIP-seq
     ax2 = ax.twinx()
     line2, = ax2.plot(
@@ -609,7 +496,6 @@ def chip_dnase(chip_array, dnase_array,xAxes,name="", xlabel="", ylabel=""):
     )
     ax2.set_ylabel('ChIP-seq Signal intensity', color='r')
     ax2.tick_params(axis='y', labelcolor='r')
-
 
     lines = [line1, line2]
     labels = [line.get_label() for line in lines]
