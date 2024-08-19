@@ -33,7 +33,6 @@ setup(
                 'test/data/gdc*',
                 'test/data/make_examples_from_pybedtools.py',
                 'test/data/x.*',
-                './remove_duplicates.sh'
             ]
         },
         scripts=[
@@ -41,8 +40,8 @@ setup(
             'Pyntegrate/scripts/metaseq-cli',
             'Pyntegrate/scripts/speedtest.py',
         ],
-        author='Ryan Dale',
-        author_email='dalerr@niddk.nih.gov',
+        author='Gerardo Fructuoso',
+        author_email='gerardofv02@gmail.com',
         url='./Pyntegrate',
         classifiers=[
             'Development Status :: 4 - Beta',
