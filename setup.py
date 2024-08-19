@@ -17,14 +17,13 @@ version_py = os.path.join(os.path.dirname(__file__), 'Pyntegrate', 'version.py')
 version = open(version_py).read().split('=')[-1].strip().replace('"','')
 
 requirements = open(os.path.join(os.path.dirname(__file__), 'requirements.txt')).readlines()
+long_description = open('README.md').read()
 
-
-long_description = open('README.rst').read()
 setup(
         name='Pyntegrate',
         version=version,
         description="Integrative analysis of high-thoughput sequencing data",
-        #long_description=long_description,
+        long_description=long_description,
         license="MIT",
         install_requires=requirements,
         packages=find_packages(),
