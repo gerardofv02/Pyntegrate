@@ -4,10 +4,10 @@ import numpy as np
 
 bins = 100
 x = np.linspace(-1000, 1000, bins)
-features, arrays, tsses, tsses_1kb = Pyntegrate.SeqSignalAnalysis.generate_arrays_features_from_tsses_from_db(dbPath='data/gencode.vM25.annotation.gtf.db', 
-                                                                                                              ipSignalPath='realData/SRR1204544_sort_nondup.bw', 
+features, arrays, tsses, tsses_1kb = Pyntegrate.SeqSignalAnalysis.generate_arrays_features_from_tsses_from_db(dbPath='/home/jerry/Documentos/Python3.10/prueba/data/gencode.vM25.annotation.gtf.db', 
+                                                                                                              ipSignalPath='/home/jerry/Documentos/Python3.10/prueba/realData/SRR1204544_sort_nondup.bw', 
                                                                                                               extensionIp='bigwig',
-                                                                                                              inputSignalPath='realData/SRR1204546_sort_nondup.bw',
+                                                                                                              inputSignalPath='/home/jerry/Documentos/Python3.10/prueba/realData/SRR1204546_sort_nondup.bw',
                                                                                                               extensionInput='bigwig', 
                                                                                                               genome='mm10', 
                                                                                                               bins=bins)
