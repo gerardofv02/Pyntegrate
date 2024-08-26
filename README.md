@@ -65,5 +65,53 @@ En este ejemplo se analizará CHIP-seq en un principio. Viendo así como calcula
 
 ![CHIP-RNA](./images_examples/CHIP-RNA.png)
 
-Este ejemplo esta completo en este repositorio. EL link es: [Example_1_Pyntegrate](./example_of_use/Example_1_Pyntegrate.ipynb)
+Este ejemplo esta completo en este repositorio. El link es: [Example_1_Pyntegrate](./example_of_use/Example_1_Pyntegrate.ipynb)
 
+### [Ejemplo 2](./example_of_use/Example_2_Pyntegrate.ipynb)
+
+En este ejemplo se analizará DNase-seq en un principio. Se crearán mapas de calor con los valores de sus señales para, posteriormente, ser analizada conjunto a RNA-seq. Un ejemplo de la gráfica generada (parecida a la de CHIP-seq con RNA-seq) es la siguiente:
+
+![DNase-RNA](./images_examples/DNase-RNA.png)
+
+Este ejemplo esta completo en este repositorio. El link es: [Example_2_Pyntegrate](./example_of_use/Example_2_Pyntegrate.ipynb)
+
+### [Ejemplo 3](./example_of_use/Example_3_Pyntegrate.ipynb)
+
+En este ejemplo se analizará CHIP-seq junto con DNase-seq. El análisis por separado de cada uno de estos tipos, se encuentran en los dos ejemplos anteriores. Para el análisis de ambos tipos juntos, se generará una gráfica (con una función de Pyntegrate) como la siguiente:
+
+![CHIP-DNASE](./images_examples/CHIP-DNASE.png)
+
+Este ejemplo esta completo en este repositorio. El link es: [Example_3_Pyntegrate](./example_of_use/Example_3_Pyntegrate.ipynb)
+
+### [Ejemplo 4](./example_of_use/Example_4_Pyntegrate.ipynb)
+
+En este ejemplo se analizarán todos los tipos de datos juntos (CHIP-seq, RNA-seq y DNase-seq) para poder tener una visión completa del proceso.
+Para ello, se han generado dos diferentes funciones de las cuales, una sirve para analizar de 2 en 2 tipos por separado, y la otra para juntar todos y analizar todos juntos, usando una gráfica de 3 dimensiones. Un ejemplo de esta gráfica sería el siguiente:
+
+![CHIP-DNASE-RNA](./images_examples/CHIP-DNASE-RNA.png)
+
+Este ejemplo esta completo en este repositorio. El link es: [Example_4_Pyntegrate](./example_of_use/Example_4_Pyntegrate.ipynb)
+
+### [Ejemplo 5](./example_of_use/Example_5_Pyntegrate.ipynb)
+
+En este ejemplo se realizará una gráfica de tipo volcano para poder analizar los datos de tipo RNA-seq. En ella se puede ver qué genes están reprimidos, expresivos y normales. Además, se podrá ver, si se desea, el nombre del gen en estos puntos. Un ejemplo de esta gráfica es el siguiente:
+
+![Volcano plot](./images_examples/Volcanoplot.png)
+
+Este ejemplo esta completo en este repositorio. El link es: [Example_5_Pyntegrate](./example_of_use/Example_5_Pyntegrate.ipynb)
+
+### [Ejemplo 6](./example_of_use/Example_6_Pyntegrate.py)
+
+En este ejemplo se va a ver como generar un diagrama circular donde, pasándole un archivo creado por la función de HOMER de ver los tipos de anotaciones, se podrá ver los distintos porcentajes de los distintos tipos de anotaciones de dicho archivo. Para ello, una gráfica de ejemplo puede ser la siguiente:
+
+![Pie Chart annotations](./images_examples/PieChartAnnotations.png)
+
+Este ejemplo esta completo en este repositorio. El link es: [Example_6_Pyntegrate](./example_of_use/Example_6_Pyntegrate.py)
+
+### [Ejemplo 7](./example_of_use/Example_7_Pyntegrate.py)
+
+En este ejemplo, se generarán mapas de calor de forma repetitiva variando los datos. Los datos de donde salen los mapas de calor son los tipos de anotaciones. Es decir, se van a ir generando mapas de calor distintos según el tipo de anotación que se tenga, especialmente para poder analizar los tipos por separado. Un ejemplo de los mapas de calor generados puede ser la siguiente imagen (en este caso sería Promoter):
+
+![Promoter heatmaps](./images_examples/Promoter.png)
+
+Este ejemplo esta completo en este repositorio. El link es: [Example_7_Pyntegrate](./example_of_use/Example_7_Pyntegrate.py)
