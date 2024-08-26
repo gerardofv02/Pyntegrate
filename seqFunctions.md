@@ -54,3 +54,60 @@ Cuando se tiene un archivo de IP y otro de INPUT en CHIP-seq, para hacer el cál
 
 - arrays_ip: Array de objetos: Donde se almacena el array de objetos mencionado anteriormente donde está indicada la información de la señal IP
 - arrays_input: Array de objetos: Donde se almacena el array de objetos mencionado anteriormente donde está indicada la información de la señal INPUT
+
+### Conversor bigwig a bed
+
+Esta función se ha creado para usarse internamente en otras funciones, pero se puede llegar a hacer uso también. Sirve para transformar un archivo bigwig a bed. Esta función se debe a que para hacer uso de algunas funciones de HOMER es necesario tener archivos de tipo bed o narrowPeak. Esta función se llama **bigwigToBed** y tiene los siguientes parámetros de entrada:
+
+- bwFile: String: Ruta al archivo bigwig
+- bedNameFile: String: Nombre del archivo bed a crear
+
+## Funciones de análisis de datos y generadoras de gráficas
+
+### Gráfica IP, INPUT distancias con el TSS
+
+Esta función devuelve una gráfica que sirve para ver la distancia de las señales de IP y de INPUT respecto a los TSS. Esta función tiene como nombre **distance_from_tss_chipSeq** y tiene los siguientes parámetros de entrada:
+
+- arrays_ip: Array: Array con los valores de la señal de IP
+- arrays_input: Array: Array con los valores de la señal de INPUT
+- xAxes: Secuencia de números igualemnte espaciados (numpy.linespace)
+
+### Mapas de calor según tipo de anotación
+
+Esta función sirve para generar los mapas de calor de los distintos tipos de regiones del ADN. Esto se debe a que viene bien analizar los distintos tipos como pueden ser promoter, exon,... Esta función tiene los sigueintes parámetros de entrada:
+
+- normalized_subtracted: Array de objetos: Donde se almacena el array de objetos mencionado anteriormente donde está indicada la información de la señal (ya sea CHIP o DNase)
+- xAxes: Secuencia de números igualemnte espaciados (numpy.linespace)
+
+### CHIP-DNASE
+
+Esta función ha sido generada para poder analizar conjuntamente los datos de tipo CHIP-seq y DNase-seq. Genera una gráfica donde tiene, en el eje y, los dos valores de CHIP y DNase con sus respectivas escalas y en el eje x, la distancia a los TSS. La función se llama **chip_dnase** y tiene los siguientes parámetros de entrada:
+
+- chip_array: Array de objetos: Donde se almacena el array de objetos mencionado anteriormente donde está indicada la información de la señal CHIP
+- dnase_array: Array de objetos: Donde se almacena el array de objetos mencionado anteriormente donde está indicada la información de la señal DNase
+- xAxes: Secuencia de números igualemnte espaciados (numpy.linespace)
+
+### Mapas de calor
+
+Estos mapas de calor sirven apra poder hacer análisis de CHIP-seq y DNase-seq. Hay 3 tipos de mapas de calor, los cuales, varían el orden en el que se presentanlos valores al mapa de calor. Estas funciones se llaman **heatmap_no_sorted, heatmap_sorted_by_meanValues y heatmap_sorted_by_maxValueIndex** y tienen como parámetros de entrada:
+
+- signal_values: Array de objetos: Donde se almacena el array de objetos mencionado anteriormente donde está indicada la información de la señal (ya sea CHIP o DNase)
+- xAxis: Secuencia de números igualemnte espaciados (numpy.linespace)
+
+###  CHIP-seq/RNA-seq o DNase-seq/RNA-seq
+
+Esta función sirve para representar gráficamente los valores de CHIP-seq o DNAse-seq con RNA-seq. ESta función muestra tres gráficas donde se ve el mapa de calor con la señal de CHIP o DNase, el enriquecimiento de esta misma señal y la combinación con RNA-seq.
+
+Esta función se llama **atac_or_chip_with_rna** y tiene los siguientes parámetros de entrada:
+
+- signal_values:  Array de objetos: Donde se almacena el array de objetos mencionado anteriormente donde está indicada la información de la señal (ya sea CHIP o DNase)
+- rna: clase DEseq2ResultsPrueba o parecida : Donde se almacena los datos de RNA-seq
+- xAxis: Secuencia de números igualemnte espaciados (numpy.linespace)
+
+### Todas las señales juntas
+
+ESta función ha sido creada para poder hacer análisis de todos los tipos de datos combinados entre sí. Para ello se ha tenido que generar una gráfica en 3 dimensiones. La función se llama **all_signal_together_new** y tiene como parámetros de entrada las siguientes variables:
+
+- chip_signal_values: Array de objetos: Donde se almacena el array de objetos mencionado anteriormente donde está indicada la información de la señal CHIP-seq
+- atac_signal_values: Array de objetos: Donde se almacena el array de objetos mencionado anteriormente donde está indicada la información de la señal DNAse-seq
+- rna: clase DEseq2ResultsPrueba o parecida : Donde se almacena los datos de RNA-seq
