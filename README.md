@@ -34,9 +34,9 @@ Para hacer uso de las funciones usadas de HOMER (ya que no son obligatorias de u
 
 Para comenzar a usar Pyntegrate, se han de tener archivos con datos genómicos cuyas extensiones pueden ser:
 
-    - bigwig, bam: Para obtener una total funcionalidad (CHIP-seq, ATAC-seq)
-    - bed, bigbed, gff, gtf, vcf: Tienen gran parte de funcionalidad, pero no disponen del conteo de lecturas de su archivo (CHIP-seq, ATAC-seq)
-    - csv: Para tener una total funcionalidad (RNA-seq)
+- bigwig, bam: Para obtener una total funcionalidad (CHIP-seq, ATAC-seq)
+- bed, bigbed, gff, gtf, vcf: Tienen gran parte de funcionalidad, pero no disponen del conteo de lecturas de su archivo (CHIP-seq, ATAC-seq)
+- csv: Para tener una total funcionalidad (RNA-seq)
 
 Una vez se tengan estos datos, para poder obtener los valores de las señales en CHIP-seq y ATAC-seq y poder obtenerla como objeto dentro del código, se ha de ejecutar la siguiente función:
 
