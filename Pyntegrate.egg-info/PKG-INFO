@@ -3,8 +3,8 @@ Name: Pyntegrate
 Version: 0.5.7
 Summary: Integrative analysis of high-thoughput sequencing data
 Home-page: ./Pyntegrate
-Author: Ryan Dale
-Author-email: dalerr@niddk.nih.gov
+Author: Gerardo Fructuoso
+Author-email: gerardofv02@gmail.com
 License: MIT
 Classifier: Development Status :: 4 - Beta
 Classifier: Intended Audience :: Science/Research
@@ -32,3 +32,6 @@ Requires-Dist: pybedtools==0.9.1
 Requires-Dist: fisher==0.1.14
 Requires-Dist: adjustText==1.1.1
 Requires-Dist: pyBigWig==0.3.22
+Requires-Dist: seaborn==0.13.2
+
+#Pyntegrate

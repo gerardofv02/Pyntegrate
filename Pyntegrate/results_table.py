@@ -1124,16 +1124,13 @@ class DEseq2Results(DifferentialExpressionResults):
         print(self.head())
         fig = plt.figure(figsize = (8,6))
 
-        # Plot graph
         ax = sns.scatterplot(data = self.data, x = 'log2FoldChange', y = 'nlog10', hue = 'color', hue_order=['upregulated', 'downregulated', 'not significant'],
                             palette=['red', 'blue', 'grey'])
 
-        # axis lines in the center of the graph
         ax.axhline(nlog10_upper, zorder = 0, c = 'k', lw = 2, ls = '--') ##Tamaño de nlog10
         ax.axvline(log2FoldChange_upper, zorder = 0, c = 'k', lw = 2, ls = '--') ##Tamaño de log2foldchange upper
         ax.axvline(log2FoldChange_lower, zorder = 0, c = 'k', lw = 2, ls = '--') ##Tamaño de log2foldChange lower
 
-        # Gene names in the graph
         if text_log2FoldChange == None or text_nlog10 == None:
             print("No texts required")
         else:
@@ -1142,27 +1139,23 @@ class DEseq2Results(DifferentialExpressionResults):
                 if self.data.iloc[i]['nlog10'] > text_nlog10 and abs(self.data.iloc[i]["log2FoldChange"]) > text_log2FoldChange:
                     texts.append(plt.text(x = self.data.iloc[i]["log2FoldChange"], y = self.data.iloc[i]["nlog10"], s = self.data.iloc[i]["gene_name"],
                                         fontsize = 12, weight = 'bold'))
-            # Arrows to the dots         
+
             adjust_text(texts, arrowprops = dict(arrowstyle = '-', color = 'k'))
 
-        # Legend position
         plt.legend(loc = 1, bbox_to_anchor = (1.4,1), frameon = False, prop = {'weight':'bold'})
-        plt.subplots_adjust(right=0.75)  # Ajusta el valor según sea necesario
+        plt.subplots_adjust(right=0.75) 
 
-        # Axis spines
         for axis in ['bottom', 'left']:
             ax.spines[axis].set_linewidth(2)
             
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
 
-        # Axis ticks
         ax.tick_params(width = 2)
 
         plt.xticks(size = 12, weight = 'bold')
         plt.yticks(size = 12, weight = 'bold')
 
-        # Axis labels
         plt.xlabel("$log_{2}$ fold change", size = 15)
         plt.ylabel("-$log_{10}$ FDR", size = 15)
         return fig

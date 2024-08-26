@@ -14,6 +14,7 @@ import sys
 from matplotlib import pyplot as plt
 import subprocess
 from .plotutils import *
+from mpl_toolkits.mplot3d import Axes3D
 
 def tss_generator(db):
     """
@@ -258,8 +259,6 @@ def homer_peaks(tag_directory,style="factor",output="auto"):
         - style: String: Style you want to use to calculate the enrichment and the positions
         - output: String: Name of the output text file
     """
-
-    print(output,style)
 
     subprocess.run(["findPeaks", tag_directory, "-style",style,"-o",output])
     return
@@ -625,6 +624,25 @@ def atac_or_chip_with_rna(signal_values, rna, xAxis,signalName=""):
     return fig
 
 
+def all_signal_together_new(chip_signal_values, atac_signal_values,rna):
+    
+    fig = plt.figure(figsize=(10, 8))
+    ax = fig.add_subplot(111, projection='3d')
+
+    ax.scatter(
+        rna['log2foldchange'],
+        chip_signal_values.mean(axis=1),
+        atac_signal_values.mean(axis=1),
+        color='b',  
+        alpha=0.7
+    )
+
+    ax.set_xlabel('log2 Fold Change (RNA-seq)')
+    ax.set_ylabel('ChIP-seq Signal Intensity')
+    ax.set_zlabel('ATAC-seq Accessibility Score')
+    ax.set_title('3D Scatter Plot: RNA-seq, ChIP-seq, and ATAC-seq')
+
+    return fig
 
 def all_signal_together(chip_signal_values, atac_signal_values,rna, xAxis,name=""):
     x = xAxis
@@ -821,7 +839,7 @@ def all_signal_together(chip_signal_values, atac_signal_values,rna, xAxis,name="
 #         line_kwargs=dict(color='.5', label='Chip-unchanged'),
 #         fill_kwargs=dict(color='.5', alpha=0.1),
 #         ax=ax4)
-#             # Signal over TSSs of transcripts that were activated upon knockdown.
+#             # Signal over TSSs of transcripts that were activated  knockdown.
 
 
 

@@ -1,6 +1,6 @@
 LICENSE.txt
 MANIFEST.in
-README.rst
+README.md
 requirements.txt
 setup.py
 Pyntegrate/SeqSignalAnalysis.py
