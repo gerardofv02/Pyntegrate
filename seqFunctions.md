@@ -1,113 +1,117 @@
 # Signal Functions
 
-Una vez se tienen las señales calculadas de nuestros archivos, se procede a explicar la variedad de funciones que existen dentro de la librería de Pyntegrate y como usarlas. La mayoría de estas funciones se encuentran dentro del archivo de SeqSignalAnalysis. Además, cada una de estas funciones tiene su propia información. Para poder verla se ha de poner el siguiente script de python:
+Once the signals from our files have been calculated, we can proceed to explain the variety of functions available in the Pyntegrate library and how to use them. Most of these functions are found within the SeqSignalAnalysis module. Additionally, each of these functions has its own documentation. To view it, you can use the following Python script:
 ```python
 help(Pyntegrate.FilesFunction.Function)
 ```
-Lo que devuelve la función para calcular las señales de los tipos, es un array de intervales, cuyo valor es un objeto con los siguientes campos:
+The function that calculates the signals for the data types returns an array of intervals, where each element is an object with the following fields:
 
-- Values: Valores de las señales
-- gene_name: Nombre del gen del intervalo
-- gene_id: id del gen del intervalo
-- strand: Indica la hebra de donde se ha sacado el intervalo
-- chr: Chromosoma del intervalo
-- start: Comienzo del intervalo
-- stop: Fin del intervalo
+- Values: Signal values
+- gene_name: Name of the gene in the interval
+- gene_id: ID of the gene in the interval
+- strand: Indicates the strand from which the interval was obtained
+- chr: Chromosome of the interval
+- start: Start of the interval
+- stop: End of the interval
 
-Para comenzar, se va a explicar como hacer una limpieza de los datos de las señales, para así poder hacer análisis conjuntos entre distintos tipos y posteriormente se explicarán las funciones que sirven para generar las gráficas y hacer el análisis.
+To begin, we'll explain how to clean the signal data to enable joint analysis between different types. Afterward, we’ll describe the functions used to generate graphs and perform the analysis.
 
-## Funciones de limpieza de datos
+## Data Cleaning Functions
 
-### CHIP-seq/RNA-seq o DNase-seq/RNA-seq
+### ChIP-seq/RNA-seq or DNase-seq/RNA-seq
 
-Esta función ha sido creada para que se devuelvan los genes coincidentes entre estos tipos. Al tener CHIP-seq y DNase-seq un procesado de datos similar, se podría usar la misma función para ambas y así encontrar los genes coincidentes.
+This function is designed to return the intersecting genes between these types. Since ChIP-seq and DNase-seq share similar data processing, the same function can be used for both to find the intersecting genes.
 
-Esta función es llamada **chip_or_atac_genes_not_used_with_rna** y tiene como parámetros de entrada las siguientes variables:
+This function is called **chip_or_atac_genes_not_used_with_rna** and has the following input parameters:
 
-- data: clase DEseq2ResultsPrueba o parecida : Donde se almacena los datos de RNA-seq
-- signal: Array de objetos: Donde se almacena el array de objetos mencionado anteriormente donde está indicada la información de la señal
-- id: String: Indica por qué valor filtrar (id, gene_name,...)
-- rna_column_name: String: Nombre de la columna de RNA para aplicar el filtrado
-- delete_no_peaks: Boolean: Si es True, elimina aquellos genes de la señal donde el valor de la media de los valores de la señal sea 0
+- data: DEseq2ResultsPrueba class or similar: Stores the RNA-seq data
+- signal: Array of objects: Stores the array of objects mentioned earlier, containing the signal information
+- id: String: Specifies the value to filter by (id, gene_name, etc.)
+- rna_column_name: String: Name of the RNA column for filtering
+- delete_no_peaks: Boolean: If True, removes genes from the signal where the mean signal value is 0
 
-### Valores de la señal
+### Signal Values
 
-En algunas funciones, es neceario unicamente añadir los valores de las señales de CHIP-seq y ATAC-seq. Para ello, se ha creado esta función donde únicamente devuelve un array con solo los valores de las señales, sin que sea un objeto.
+In some functions, it is necessary to only add the signal values from ChIP-seq and ATAC-seq. This function returns an array containing only the signal values, without the object.
 
-Esta función es llamada **value_array_simple** y tiene el siguiente parámetro de entrada:
+This function is called **value_array_simple** and has the following input parameter:
 
-- array: Array de objetos: Donde se almacena el array de objetos mencionado anteriormente donde está indicada la información de la señal
+- array: Array of objects: Stores the array of objects mentioned earlier, containing the signal information
 
-###  CHIP-seq/DNase-seq
+###  ChIP-seq/DNase-seq
 
-Esta función ha sido creada para que se devuelvan los genes coincidentes entre CHIP-seq y DNase-seq.
+This function is designed to return the intersecting genes between ChIP-seq and DNase-seq.
 
-Esta función es llamada **chip_genes_not_used_with_atac** y tiene como parámetros de entrada las siguientes variables:
+This function is called **chip_genes_not_used_with_atac** and has the following input parameters:
 
-- atac_signal: Array de objetos: Donde se almacena el array de objetos mencionado anteriormente donde está indicada la información de la señal DNase
-- chip_signal: Array de objetos: Donde se almacena el array de objetos mencionado anteriormente donde está indicada la información de la señal CHIP
-- by: String: Indica por qué valor filtrar (id, gene_name,...)
+- atac_signal: Array of objects: Stores the array of objects mentioned earlier, containing the DNase signal information
+- chip_signal: Array of objects: Stores the array of objects mentioned earlier, containing the ChIP signal information
+- by: String: Specifies the value to filter by (id, gene_name, etc.)
 
-### Calcular picos CHIP-seq
+### Calculating ChIP-seq Peaks
 
-Cuando se tiene un archivo de IP y otro de INPUT en CHIP-seq, para hacer el cálculo de los picos, se tiene una función específica en Pyntegrate.  Esta función es llamada **calculate_peaks_with_gene_name** y tiene las siguientes variables de entrada:
+When you have both an IP and INPUT file in ChIP-seq, a specific function in Pyntegrate can calculate the peaks.
+This function is called **calculate_peaks_with_gene_name** and has the following input parameters:
 
-- arrays_ip: Array de objetos: Donde se almacena el array de objetos mencionado anteriormente donde está indicada la información de la señal IP
-- arrays_input: Array de objetos: Donde se almacena el array de objetos mencionado anteriormente donde está indicada la información de la señal INPUT
+- arrays_ip: Array of objects: Stores the array of objects mentioned earlier, containing the IP signal information
+- arrays_input: Array of objects: Stores the array of objects mentioned earlier, containing the INPUT signal information
 
-### Conversor bigwig a bed
+### Bigwig to Bed Converter
 
-Esta función se ha creado para usarse internamente en otras funciones, pero se puede llegar a hacer uso también. Sirve para transformar un archivo bigwig a bed. Esta función se debe a que para hacer uso de algunas funciones de HOMER es necesario tener archivos de tipo bed o narrowPeak. Esta función se llama **bigwigToBed** y tiene los siguientes parámetros de entrada:
+This function was created for internal use in other functions, but it can also be used directly. It converts a bigwig file to bed format, which is necessary for some HOMER functions.
+This function is called **bigwigToBed** and has the following input parameters:
 
-- bwFile: String: Ruta al archivo bigwig
-- bedNameFile: String: Nombre del archivo bed a crear
+- bwFile: String: Path to the bigwig file
+- bedNameFile: String: Name of the bed file to create
 
-## Funciones de análisis de datos y generadoras de gráficas
+## Data Analysis and Graph Generation Functions
 
-### Gráfica IP, INPUT distancias con el TSS
+### IP, INPUT Distance from TSS Graph
 
-Esta función devuelve una gráfica que sirve para ver la distancia de las señales de IP y de INPUT respecto a los TSS. Esta función tiene como nombre **distance_from_tss_chipSeq** y tiene los siguientes parámetros de entrada:
+This function returns a graph showing the distance of the IP and INPUT signals from TSS.
+The function is named **distance_from_tss_chipSeq** and has the following input parameters:
 
-- arrays_ip: Array: Array con los valores de la señal de IP
-- arrays_input: Array: Array con los valores de la señal de INPUT
-- xAxes: Secuencia de números igualemnte espaciados (numpy.linespace)
+- arrays_ip: Array: Array containing the IP signal values
+- arrays_input: Array: Array containing the INPUT signal values
+- xAxes: Sequence of equally spaced numbers (numpy.linespace)
 
-### Mapas de calor según tipo de anotación
+### Heatmaps by Annotation Type
 
-Esta función sirve para generar los mapas de calor de los distintos tipos de regiones del ADN. Esto se debe a que viene bien analizar los distintos tipos como pueden ser promoter, exon,... Esta función tiene los sigueintes parámetros de entrada:
+This function generates heatmaps for different types of DNA regions. It is useful for analyzing different types, such as promoters, exons, etc. The function is named **annotation_type_heatmap** and has the following input parameters:
 
-- normalized_subtracted: Array de objetos: Donde se almacena el array de objetos mencionado anteriormente donde está indicada la información de la señal (ya sea CHIP o DNase)
-- xAxes: Secuencia de números igualemnte espaciados (numpy.linespace)
+- normalized_subtracted: Array of objects: Stores the array of objects mentioned earlier, containing the signal information (either ChIP or DNase)
+- xAxes: Sequence of equally spaced numbers (numpy.linespace)
 
-### CHIP-DNASE
+### ChIP-DNASE
 
-Esta función ha sido generada para poder analizar conjuntamente los datos de tipo CHIP-seq y DNase-seq. Genera una gráfica donde tiene, en el eje y, los dos valores de CHIP y DNase con sus respectivas escalas y en el eje x, la distancia a los TSS. La función se llama **chip_dnase** y tiene los siguientes parámetros de entrada:
+This function was created to allow joint analysis of ChIP-seq and DNase-seq data. It generates a graph where the y-axis shows the values for both ChIP and DNase with their respective scales, and the x-axis shows the distance to TSS.
+The function is named **chip_dnase** and has the following input parameters:
 
-- chip_array: Array de objetos: Donde se almacena el array de objetos mencionado anteriormente donde está indicada la información de la señal CHIP
-- dnase_array: Array de objetos: Donde se almacena el array de objetos mencionado anteriormente donde está indicada la información de la señal DNase
-- xAxes: Secuencia de números igualemnte espaciados (numpy.linespace)
+- chip_array: Array of objects: Stores the array of objects mentioned earlier, containing the ChIP signal information
+- dnase_array: Array of objects: Stores the array of objects mentioned earlier, containing the DNase signal information
+- xAxes: Sequence of equally spaced numbers (numpy.linespace)
 
-### Mapas de calor
+### Heatmaps
 
-Estos mapas de calor sirven apra poder hacer análisis de CHIP-seq y DNase-seq. Hay 3 tipos de mapas de calor, los cuales, varían el orden en el que se presentanlos valores al mapa de calor. Estas funciones se llaman **heatmap_no_sorted, heatmap_sorted_by_meanValues y heatmap_sorted_by_maxValueIndex** y tienen como parámetros de entrada:
+These heatmaps are used to analyze ChIP-seq and DNase-seq. There are three types of heatmaps, which vary in the order in which values are presented in the heatmap. These functions are called **heatmap_no_sorted**, **heatmap_sorted_by_meanValues**, and **heatmap_sorted_by_maxValueIndex** and have the following input parameters:
 
-- signal_values: Array de objetos: Donde se almacena el array de objetos mencionado anteriormente donde está indicada la información de la señal (ya sea CHIP o DNase)
-- xAxis: Secuencia de números igualemnte espaciados (numpy.linespace)
+- signal_values: Array of objects: Stores the array of objects mentioned earlier, containing the signal information (either ChIP or DNase)
+- xAxis: Sequence of equally spaced numbers (numpy.linespace)
 
-###  CHIP-seq/RNA-seq o DNase-seq/RNA-seq
+###  ChIP-seq/RNA-seq or DNase-seq/RNA-seq
 
-Esta función sirve para representar gráficamente los valores de CHIP-seq o DNAse-seq con RNA-seq. ESta función muestra tres gráficas donde se ve el mapa de calor con la señal de CHIP o DNase, el enriquecimiento de esta misma señal y la combinación con RNA-seq.
+This function graphically represents the values of ChIP-seq or DNase-seq with RNA-seq. It displays three graphs showing the heatmap with the ChIP or DNase signal, the enrichment of this signal, and the combination with RNA-seq.
+This function is called **atac_or_chip_with_rna** and has the following input parameters:
 
-Esta función se llama **atac_or_chip_with_rna** y tiene los siguientes parámetros de entrada:
+- signal_values: Array of objects: Stores the array of objects mentioned earlier, containing the signal information (either ChIP or DNase)
+- rna: DEseq2ResultsPrueba class or similar: Stores the RNA-seq data
+- xAxis: Sequence of equally spaced numbers (numpy.linespace)
 
-- signal_values:  Array de objetos: Donde se almacena el array de objetos mencionado anteriormente donde está indicada la información de la señal (ya sea CHIP o DNase)
-- rna: clase DEseq2ResultsPrueba o parecida : Donde se almacena los datos de RNA-seq
-- xAxis: Secuencia de números igualemnte espaciados (numpy.linespace)
+### All Signals Together
 
-### Todas las señales juntas
+This function was created to analyze all data types combined. To do this, a 3D graph is generated.
+The function is named **all_signal_together_new** and has the following input parameters:
 
-ESta función ha sido creada para poder hacer análisis de todos los tipos de datos combinados entre sí. Para ello se ha tenido que generar una gráfica en 3 dimensiones. La función se llama **all_signal_together_new** y tiene como parámetros de entrada las siguientes variables:
-
-- chip_signal_values: Array de objetos: Donde se almacena el array de objetos mencionado anteriormente donde está indicada la información de la señal CHIP-seq
-- atac_signal_values: Array de objetos: Donde se almacena el array de objetos mencionado anteriormente donde está indicada la información de la señal DNAse-seq
-- rna: clase DEseq2ResultsPrueba o parecida : Donde se almacena los datos de RNA-seq
+- chip_signal_values: Array of objects: Stores the array of objects mentioned earlier, containing the ChIP-seq signal information
+- atac_signal_values: Array of objects: Stores the array of objects mentioned earlier, containing the DNase-seq signal information
+- rna: DEseq2ResultsPrueba class or similar: Stores the RNA-seq data
