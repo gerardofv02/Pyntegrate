@@ -3,9 +3,10 @@ library(MOSim)
 
 # Definir la lista de omics
 omics_list <- c("RNA-seq")
+omics_options <- list(omicSim("RNA-seq", totalFeatures = 10, regulatorEffect=list('activator'=1, 'repressor'=0, 'NE'=0 ), depth=10))
 
 # Realizar la simulación
-sim <- mosim(omics = omics_list)
+sim <- mosim(omics = omics_list, omicsOptions = omics_options)
 
 # Obtener los resultados de la simulación
 res <- tryCatch(
@@ -47,6 +48,6 @@ cat("Primeros elementos después del redondeo:\n")
 print(head(res_rounded))
 
 # Guardar los resultados redondeados en un archivo
-file_name <- "test_RNA-seq.csv"
+file_name <- "test_2_options_RNA-seq.csv"
 write.table(res_rounded, file = file_name, sep = "\t", row.names = FALSE, col.names = TRUE)
 cat("Resultados guardados en:", file_name, "\n")

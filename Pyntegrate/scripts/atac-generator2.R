@@ -4,9 +4,9 @@ library(MOSim)
 library(rtracklayer)
 library(GenomicRanges)
 
-omics_list <- c("ChIP-seq")
+omics_list <- c("DNase-seq")
 
-omics_options <- list(omicSim("ChIP-seq", totalFeatures = 1000))
+omics_options <- list(omicSim("DNase-seq", totalFeatures = 1000, regulatorEffect=list('activator'=0.9, 'repressor'=0.05, 'NE'=0.05 )))
 
 sim <- mosim(omics = omics_list, omicsOptions = omics_options)
 
@@ -70,7 +70,8 @@ for (omic in omics_list) {
     score_agg <- sapply(gr_collapsed$revmap, function(x) sum(gr$score[x]))
     gr_collapsed$score <- score_agg
     gr_collapsed$revmap <- NULL
-    export.bw(gr_collapsed, file_name)
+    df_good <- gr_collapsed[1:5000]
+    export.bw(df_good, file_name)
 
   } else {
     cat("Las columnas necesarias no están presentes en los datos para", omic, "\n")

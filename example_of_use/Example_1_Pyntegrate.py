@@ -7,10 +7,10 @@ import os
 import gffutils
 import Pyntegrate
 bins = 100
-features, arrays, tsses, tsses_1kb = Pyntegrate.SeqSignalAnalysis.generate_arrays_features_from_tsses_from_db(dbPath='data/gencode.vM25.annotation.gtf.db', 
-                                                                                                              ipSignalPath='realData/SRR1204544_sort_nondup.bw', 
+features, arrays, tsses, tsses_1kb = Pyntegrate.SeqSignalAnalysis.generate_arrays_features_from_tsses_from_db(dbPath='/home/jerry/Documentos/Python3.10/prueba/data/gencode.vM25.annotation.gtf.db', 
+                                                                                                              ipSignalPath='/home/jerry/Documentos/Python3.10/prueba/realData/SRR1204544_sort_nondup.bw', 
                                                                                                               extensionIp='bigwig',
-                                                                                                              inputSignalPath='realData/SRR1204546_sort_nondup.bw',
+                                                                                                              inputSignalPath='/home/jerry/Documentos/Python3.10/prueba/realData/SRR1204546_sort_nondup.bw',
                                                                                                               extensionInput='bigwig', 
                                                                                                               genome='mm10', 
                                                                                                               bins=bins)
@@ -31,7 +31,7 @@ fig = Pyntegrate.SeqSignalAnalysis.heatmap_no_sorted(signal_values=normalized_su
 fig = Pyntegrate.SeqSignalAnalysis.heatmap_sorted_by_meanValues(signal_values=normalized_subtracted_values, xAxis=x)
 fig = Pyntegrate.SeqSignalAnalysis.heatmap_sorted_by_maxValueIndex(signal_values=normalized_subtracted_values, xAxis=x)
 
-data = Pyntegrate.results_table.DEseq2Results('realData/desq2_Sanchez.csv')
+data = Pyntegrate.results_table.DEseq2Results('/home/jerry/Documentos/Python3.10/prueba/realData/desq2_Sanchez.csv')
 data.reindex_to(tsses, attribute='gene_name')
 # print(len(normalized_subtracted), len(data), "\n\n\n\n\n\n")
 

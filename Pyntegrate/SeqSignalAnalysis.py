@@ -627,7 +627,7 @@ def atac_or_chip_with_rna(signal_values, rna, xAxis,signalName=""):
 def all_signal_together_new(chip_signal_values, atac_signal_values,rna):
 
     """
-    Function to make a 3d figura where is combined ATAC-seq Chip-seq and RNA-seq
+    Function to make a 3d figure where is combined ATAC-seq Chip-seq and RNA-seq
     Params:
         - chip_signal_values: Array: Array where are stored the signal values of CHIP-seq
         - atac_signal_values: Array: Array where are stored the signal values of DNase-seq or ATAC-seq
