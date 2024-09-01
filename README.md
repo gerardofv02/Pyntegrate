@@ -20,7 +20,12 @@ sudo apt update
 sudo apt install git
 ```
 
-Once Git is installed, the following command should be executed:
+Once Git is installed, is needed to have some essentials tools installed. For that, the following commando should be executed:
+```console
+sudo apt-get install build-essential
+```
+
+Once the essentials tools are installed, the following command should be executed:
 
 ```console
 pip install git+https://github.com/gerardofv02/Pyntegrate.git
