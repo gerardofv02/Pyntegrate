@@ -30,6 +30,15 @@ Once the essentials tools are installed, the following command should be execute
 ```console
 pip install git+https://github.com/gerardofv02/Pyntegrate.git
 ```
+For the full fucntionality, is required to install bedtools. For that, there are two options:
+- Using conda:
+  ```console
+  conda install -c bioconda bedtools
+  ```
+- Not using conda:
+  ```console
+  sudo apt-get install bedtools
+  ```
 
 ## HOMER Installation
 
